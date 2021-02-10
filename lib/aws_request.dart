@@ -48,17 +48,17 @@ class AwsRequest {
     return this._service;
   }
 
-  // Builds, signs, and sends aws http requests.
-  // type: request type [GET, POST, PUT, etc]
-  // service: aws service you are sending request to
-  // target: your instance of that service plus the operation [Logs_XXXXXXXX.PutLogEvents]
-  // signedHeaders: a list of headers aws requires in the signature.
-  //    Default included signed headers are: [content-type, host, x-amz-date, x-amz-target]
-  //    (You do not need to provide these in headers)
-  // headers: any required headers. Any non-default headers included in the signedHeaders must be added here.
-  // jsonBody: the body of the request, formatted as json
-  // queryPath: the aws query path
-  // queryString: the aws query string, formatted like ['abc=123&def=456']. Must be url encoded
+  /// Builds, signs, and sends aws http requests.
+  /// type: request type [GET, POST, PUT, etc]
+  /// service: aws service you are sending request to
+  /// target: your instance of that service plus the operation [Logs_XXXXXXXX.PutLogEvents]
+  /// signedHeaders: a list of headers aws requires in the signature.
+  ///    Default included signed headers are: [content-type, host, x-amz-date, x-amz-target]
+  ///    (You do not need to provide these in headers)
+  /// headers: any required headers. Any non-default headers included in the signedHeaders must be added here.
+  /// jsonBody: the body of the request, formatted as json
+  /// queryPath: the aws query path
+  /// queryString: the aws query string, formatted like ['abc=123&def=456']. Must be url encoded
   Future<HttpClientResponse> send(
     String type, {
     String service,
