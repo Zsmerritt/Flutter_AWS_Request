@@ -1,8 +1,7 @@
 name: aws_request
-description: A new Flutter package project.
+description: An AWS request library that creates, signs, and sends aws requests. Currently under development
 version: 0.0.1
-author:
-homepage:
+homepage: https://github.com/Zsmerritt/Flutter_AWS_Request
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
