@@ -12,12 +12,18 @@ class AwsRequestException implements Exception {
 }
 
 class AwsRequest {
+  // Public
+  /// The aws service you are sending a request to
+  String service;
+
+  /// The your instance of the service plus the operation (ie Logs_XXXXXXXX.PutLogEvents)
+  String target;
+
+  // Private
   String _awsAccessKey;
   String _awsSecretKey;
   String _region;
   HttpClient _httpClient = new HttpClient();
-  String _service;
-  String _target;
   static const Map<String, String> _defaultHeaders = {
     'User-Agent': 'Dart/2.10 (dart:io)',
     'Accept-Encoding': 'gzip, deflate',
@@ -30,22 +36,6 @@ class AwsRequest {
     this._awsAccessKey = awsAccessKey;
     this._awsSecretKey = awsSecretKey;
     this._region = region;
-  }
-
-  void setTarget(String target) {
-    this._target = target;
-  }
-
-  void setService(String service) {
-    this._service = service;
-  }
-
-  String getTarget() {
-    return this._target;
-  }
-
-  String getService() {
-    return this._service;
   }
 
   /// Builds, signs, and sends aws http requests.
@@ -75,14 +65,14 @@ class AwsRequest {
 
   String _getTarget([String target]) {
     if (target == null) {
-      target = this._target;
+      target = this.target;
     }
     return target;
   }
 
   String _getService([String service]) {
     if (service == null) {
-      service = this._service;
+      service = this.service;
     }
     return service;
   }
@@ -104,7 +94,7 @@ class AwsRequest {
           signedHeaders[key] = headers[key];
         } else {
           throw AwsRequestException(
-              'AWSRequest ERROR: Signed Header Not Found: '
+              'AwsRequest ERROR: Signed Header Not Found: '
               '$key could not be found in the included headers. '
               'Provided header keys are ${headers.keys.toList()}'
               'All headers besides [content-type, host, x-amz-date, x-amz-target] '
@@ -196,18 +186,18 @@ class AwsRequest {
   }
 
   Map<String, dynamic> _validateRequest(String service, String target) {
-    if (this._service == null && service == null) {
+    if (this.service == null && service == null) {
       return {
         'valid': false,
         'error':
-            'No Service Provided. Please pass in a service or set one with AWSRequest.setService(String serviceName)'
+            'No Service Provided. Please pass in a service or set one with AwsRequest.setService(String serviceName)'
       };
     }
-    if (this._target == null && target == null) {
+    if (this.target == null && target == null) {
       return {
         'valid': false,
         'error':
-            'No Target Provided. Please pass in a service or set one with AWSRequest.setTarget(String targetName)'
+            'No Target Provided. Please pass in a service or set one with AwsRequest.setTarget(String targetName)'
       };
     }
     return {'valid': true, 'error': null};
@@ -227,21 +217,21 @@ class AwsRequest {
       request = await _httpClient.putUrl(Uri.parse(url));
     } else {
       throw AwsRequestException(
-          'AWSRequest: ERROR: Request type not supported. Options are: [GET, POST, DELETE, PATCH, PUT]');
+          'AwsRequest: ERROR: Request type not supported. Options are: [GET, POST, DELETE, PATCH, PUT]');
     }
     return request;
   }
 
   Future<HttpClientResponse> _send(
-      String type,
-      String service,
-      String target,
-      List<String> signedHeaders,
-      Map<String, String> headers,
-      String jsonBody,
-      String canonicalUri,
-      String canonicalQuerystring,
-      {bool testing = false}) async {
+    String type,
+    String service,
+    String target,
+    List<String> signedHeaders,
+    Map<String, String> headers,
+    String jsonBody,
+    String canonicalUri,
+    String canonicalQuerystring,
+  ) async {
     // set default variables that cant be constant
     service = _getService(service);
     target = _getTarget(target);
@@ -276,7 +266,7 @@ class AwsRequest {
       return result;
     } else {
       throw new AwsRequestException(
-          'AWSRequestException: ${validation['error']}');
+          'AwsRequestException: ${validation['error']}');
     }
   }
 }
