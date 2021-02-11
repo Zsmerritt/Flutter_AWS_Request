@@ -1,7 +1,9 @@
 # aws_request
 
-A package to sign and send requests to AWS. 
-This package is still under development and may introduce breaking changes in the future
+A package that generates, signs, sends requests to AWS.  
+**This package is still under development**
+
+The repository can be found [here](https://github.com/Zsmerritt/Flutter_AWS_Request)
 
 Supported HTTP methods are get, post, delete, patch, put.
 
@@ -9,7 +11,13 @@ If you have feedback or have a use case that isn't covered feel free to contact 
 
 ## Getting Started
 
-To get start add `aws_request: ^[CURRENT_VERION]` to your `pubspec.yaml`
+To get start add `aws_request: ^[CURRENT_VERION],` to your `pubspec.yaml`
+
+Then create a request: 
+~~~
+AwsRequest request = new AwsRequest('awsAccessKey', 'awsSecretKey', 'region');
+~~~
+Finally send your request by calling `request.send('TYPE');`
 
 The following parameters can be provided to the `send()` function:
 ~~~
@@ -24,14 +32,17 @@ jsonBody: the body of the request, formatted as json
 queryPath: the aws query path
 queryString: the aws query string, formatted like ['abc=123&def=456']. Must be url encoded
 ~~~
+## Examples
+
 Here's an example of using aws_request to send a CloudWatch PutLogEvent request:
 
 ~~~dart
 import 'package:aws_request/aws_request.dart';
+import 'dart:io';
 
 void sendCloudWatchLog(String logString) async {
-    AWSRequest request = new AwsRequest('awsAccessKey', 'awsSecretKey', 'region');
-    String body = """  
+  AwsRequest request = new AwsRequest('awsAccessKey', 'awsSecretKey', 'region');
+  String body = """  
             {"logEvents":
               [{
                 "timestamp":${DateTime.now().toUtc().millisecondsSinceEpoch},
@@ -40,11 +51,11 @@ void sendCloudWatchLog(String logString) async {
               "logGroupName":"ExampleLogGroupName",
               "logStreamName":"ExampleLogStreamName"
             }""";
-    HttpClientResponse result = await request.send(
-      'POST',
-      jsonBody: body, 
-      target: 'Logs_XXXXXXXX.PutLogEvents',
-      service: 'logs',
-    );
+  HttpClientResponse result = await request.send(
+    'POST',
+    jsonBody: body,
+    target: 'Logs_XXXXXXXX.PutLogEvents',
+    service: 'logs',
+  );
 }
 ~~~
