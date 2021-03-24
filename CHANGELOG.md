@@ -10,3 +10,8 @@
 
 * Reverted issue with null safety. This will be fixed later
 * Added files to example to help it execute 
+
+## [0.1.0] - 2021/03/23
+
+* Added support for null safety
+* Updated dependencies for null safety compatibility
