@@ -1,6 +1,6 @@
 name: aws_request
 description: An AWS request library that creates, signs, and sends aws requests. Currently under development
-version: 0.0.3
+version: 0.1.0
 homepage: https://github.com/Zsmerritt/Flutter_AWS_Request
 
 environment:
@@ -11,8 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  intl: ^0.16.1 # Date Formatting
-  crypto: ^2.1.5 # Key Signing
+  intl: ^0.17.0 # Date Formatting
+  crypto: ^3.0.0 # Key Signing
 
 dev_dependencies:
   flutter_test:
