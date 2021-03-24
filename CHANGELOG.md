@@ -15,3 +15,7 @@
 
 * Added support for null safety
 * Updated dependencies for null safety compatibility
+
+## [0.1.1] - 2021/03/24
+
+* Actually migrated to null safety instead of just upgrading packages
