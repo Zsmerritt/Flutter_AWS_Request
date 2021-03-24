@@ -185,7 +185,7 @@ class AwsRequest {
     return url;
   }
 
-  Map<String, dynamic> _validateRequest(String service, String target) {
+  Map<String, dynamic> _validateRequest(String? service, String? target) {
     if (this.service == null && service == null) {
       return {
         'valid': false,

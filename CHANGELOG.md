@@ -19,3 +19,7 @@
 ## [0.1.1] - 2021/03/24
 
 * Actually migrated to null safety instead of just upgrading packages
+
+## [0.1.2] - 2021/03/24
+
+* Fixed `flutter analyze` issues related to null safety
