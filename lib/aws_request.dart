@@ -14,15 +14,15 @@ class AwsRequestException implements Exception {
 class AwsRequest {
   // Public
   /// The aws service you are sending a request to
-  String service;
+  String? service;
 
   /// The your instance of the service plus the operation (ie Logs_XXXXXXXX.PutLogEvents)
-  String target;
+  String? target;
 
   // Private
-  String _awsAccessKey;
-  String _awsSecretKey;
-  String _region;
+  String? _awsAccessKey;
+  late String _awsSecretKey;
+  String? _region;
   HttpClient _httpClient = new HttpClient();
   static const Map<String, String> _defaultHeaders = {
     'User-Agent': 'Dart/2.10 (dart:io)',
@@ -51,9 +51,9 @@ class AwsRequest {
   /// queryString: the aws query string, formatted like ['abc=123&def=456']. Must be url encoded
   Future<HttpClientResponse> send(
     String type, {
-    String service,
-    String target,
-    List<String> signedHeaders,
+    String? service,
+    String? target,
+    List<String>? signedHeaders,
     Map<String, String> headers = AwsRequest._defaultHeaders,
     String jsonBody = '',
     String queryPath = '/',
@@ -63,27 +63,27 @@ class AwsRequest {
         queryPath, queryString);
   }
 
-  String _getTarget([String target]) {
+  String _getTarget([String? target]) {
     if (target == null) {
       target = this.target;
     }
-    return target;
+    return target!;
   }
 
-  String _getService([String service]) {
+  String _getService([String? service]) {
     if (service == null) {
       service = this.service;
     }
-    return service;
+    return service!;
   }
 
-  Map<String, String> _getSignedHeaders(
+  Map<String, String?> _getSignedHeaders(
       Map<String, String> headers,
-      List<String> signedHeaderNames,
+      List<String>? signedHeaderNames,
       String target,
       String host,
       String amzDate) {
-    Map<String, String> signedHeaders = {
+    Map<String, String?> signedHeaders = {
       'host': host,
       'x-amz-date': amzDate,
       'x-amz-target': target
@@ -110,7 +110,7 @@ class AwsRequest {
     return signedHeaders;
   }
 
-  dynamic _sign(List<int> key, String msg, {bool hex}) {
+  dynamic _sign(List<int> key, String msg, {bool? hex}) {
     if (hex != null && hex) {
       return Hmac(sha256, key).convert(utf8.encode(msg)).toString();
     } else {
@@ -129,7 +129,7 @@ class AwsRequest {
 
   String _getCanonicalRequest(
       String requestBody,
-      Map<String, String> signedHeaders,
+      Map<String, String?> signedHeaders,
       String canonicalUri,
       String canonicalQuerystring) {
     List<String> canonicalHeaders = [];
@@ -224,9 +224,9 @@ class AwsRequest {
 
   Future<HttpClientResponse> _send(
     String type,
-    String service,
-    String target,
-    List<String> signedHeaders,
+    String? service,
+    String? target,
+    List<String>? signedHeaders,
     Map<String, String> headers,
     String jsonBody,
     String canonicalUri,
@@ -244,7 +244,7 @@ class AwsRequest {
       String url = _constructUrl(host, canonicalUri, canonicalQuerystring);
       String amzDate =
           DateFormat("yyyyMMdd'T'HHmmss'Z'").format(DateTime.now().toUtc());
-      Map<String, String> signedHeadersMap =
+      Map<String, String?> signedHeadersMap =
           _getSignedHeaders(headers, signedHeaders, target, host, amzDate);
 
       // generate canonical request, auth, and headers
