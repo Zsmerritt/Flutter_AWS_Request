@@ -23,3 +23,7 @@
 ## [0.1.2] - 2021/03/24
 
 * Fixed `flutter analyze` issues related to null safety
+
+## [0.1.3] - 2021/03/25
+
+* Fixed issue with sending non unicode characters in request body
