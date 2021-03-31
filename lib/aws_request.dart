@@ -170,7 +170,7 @@ class AwsRequest {
       'X-Amz-Date': amzDate,
       'x-amz-target': target,
       'host': host,
-      'content-length': requestBody.length.toString(),
+      'content-length': utf8.encode(requestBody).length.toString(),
     };
     defaultHeaders.addAll(headers);
     return defaultHeaders;

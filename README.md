@@ -17,13 +17,13 @@ Then create a request:
 ~~~
 AwsRequest request = new AwsRequest('awsAccessKey', 'awsSecretKey', 'region');
 ~~~
-Finally send your request by calling `request.send('TYPE');`
+Finally, send your request by calling `request.send('TYPE');`
 
 The following parameters can be provided to the `send()` function:
 ~~~
 type: request type [GET, POST, PUT, etc]
 service: aws service you are sending request to
-target: your instance of that service plus the operation [Logs_XXXXXXXX.PutLogEvents]
+target: the api version of that service plus the operation [Logs_XXXXXXXX.PutLogEvents]
 signedHeaders: a list of headers aws requires in the signature.
    Default included signed headers are: [content-type, host, x-amz-date, x-amz-target]
    (You do not need to provide these in headers)
