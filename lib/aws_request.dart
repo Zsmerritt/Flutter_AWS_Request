@@ -147,14 +147,14 @@ class AwsRequest {
     return canonicalRequest;
   }
 
-  String _getAuth(String amzDate, String canonicalRequest) {
+  String _getAuth(String amzDate, String canonicalRequest, String region) {
     String algorithm = 'AWS4-HMAC-SHA256';
     String dateStamp = DateFormat('yyyyMMdd').format(DateTime.now().toUtc());
-    String credentialScope = '$dateStamp/us-west-2/logs/aws4_request';
+    String credentialScope = '$dateStamp/$region/logs/aws4_request';
     String stringToSign =
         '$algorithm\n$amzDate\n$credentialScope\n${sha256.convert(utf8.encode(canonicalRequest)).toString()}';
     String signature = _getSignature(
-        this._awsSecretKey, dateStamp, 'us-west-2', 'logs', stringToSign);
+        this._awsSecretKey, dateStamp, region, 'logs', stringToSign);
     return '$algorithm Credential=${this._awsAccessKey}/$credentialScope, SignedHeaders=content-type;host;x-amz-date;x-amz-target, Signature=$signature';
   }
 
@@ -250,7 +250,7 @@ class AwsRequest {
       // generate canonical request, auth, and headers
       String canonicalRequest = _getCanonicalRequest(
           jsonBody, signedHeadersMap, canonicalUri, canonicalQuerystring);
-      String auth = _getAuth(amzDate, canonicalRequest);
+      String auth = _getAuth(amzDate, canonicalRequest, this._region);
       Map<String, String> updatedHeaders =
           _getHeaders(host, jsonBody, headers, target, amzDate, auth);
 

@@ -1,29 +1,33 @@
-## [0.0.1] - 2021/02/10
+## [0.1.4] - 2021/05/18
 
-* Added initial files for sending signed aws requests
+* Removed old hard coded region values and replaced with dynamic region
 
-## [0.0.2] - 2021/02/10
+## [0.1.3] - 2021/03/25
 
-* Fixed readme.md and added example
+* Fixed issue with sending non unicode characters in request body
 
-## [0.0.3] - 2021/02/10
+## [0.1.2] - 2021/03/24
 
-* Reverted issue with null safety. This will be fixed later
-* Added files to example to help it execute 
+* Fixed `flutter analyze` issues related to null safety
+
+## [0.1.1] - 2021/03/24
+
+* Actually migrated to null safety instead of just upgrading packages
 
 ## [0.1.0] - 2021/03/23
 
 * Added support for null safety
 * Updated dependencies for null safety compatibility
 
-## [0.1.1] - 2021/03/24
+## [0.0.3] - 2021/02/10
 
-* Actually migrated to null safety instead of just upgrading packages
+* Reverted issue with null safety. This will be fixed later
+* Added files to example to help it execute
 
-## [0.1.2] - 2021/03/24
+## [0.0.2] - 2021/02/10
 
-* Fixed `flutter analyze` issues related to null safety
+* Fixed readme.md and added example
 
-## [0.1.3] - 2021/03/25
+## [0.0.1] - 2021/02/10
 
-* Fixed issue with sending non unicode characters in request body
+* Added initial files for sending signed aws requests
