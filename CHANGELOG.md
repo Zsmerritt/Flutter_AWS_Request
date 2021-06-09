@@ -1,3 +1,8 @@
+## [0.1.5] - 2021/06/08
+
+* Fixed null safety typing issue
+* Reformatted aws_request.dart
+
 ## [0.1.4] - 2021/05/18
 
 * Removed old hard coded region values and replaced with dynamic region

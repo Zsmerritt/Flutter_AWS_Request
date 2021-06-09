@@ -20,9 +20,9 @@ class AwsRequest {
   String? target;
 
   // Private
-  String? _awsAccessKey;
-  late String _awsSecretKey;
-  String? _region;
+  String _awsAccessKey;
+  String _awsSecretKey;
+  String _region;
   HttpClient _httpClient = new HttpClient();
   static const Map<String, String> _defaultHeaders = {
     'User-Agent': 'Dart/2.10 (dart:io)',
@@ -32,11 +32,7 @@ class AwsRequest {
     'Content-Type': 'application/x-amz-json-1.1',
   };
 
-  AwsRequest(String awsAccessKey, String awsSecretKey, String region) {
-    this._awsAccessKey = awsAccessKey;
-    this._awsSecretKey = awsSecretKey;
-    this._region = region;
-  }
+  AwsRequest(this._awsAccessKey, this._awsSecretKey, this._region) {}
 
   /// Builds, signs, and sends aws http requests.
   /// type: request type [GET, POST, PUT, etc]
