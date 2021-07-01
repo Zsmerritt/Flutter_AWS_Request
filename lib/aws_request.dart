@@ -1,7 +1,7 @@
 library aws_request;
 
 import 'dart:convert';
-import 'dart:io';
+import 'package:universal_io/io.dart';
 
 import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
@@ -32,7 +32,7 @@ class AwsRequest {
     'Content-Type': 'application/x-amz-json-1.1',
   };
 
-  AwsRequest(this._awsAccessKey, this._awsSecretKey, this._region) {}
+  AwsRequest(this._awsAccessKey, this._awsSecretKey, this._region);
 
   /// Builds, signs, and sends aws http requests.
   /// type: request type [GET, POST, PUT, etc]
