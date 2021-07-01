@@ -7,8 +7,11 @@ import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
 
 class AwsRequestException implements Exception {
-  String cause;
-  AwsRequestException(this.cause);
+  String message;
+  String cause; /// deprecated
+  AwsRequestException(String message):
+    this.cause = message,
+    this.message = message;
 }
 
 class AwsRequest {
