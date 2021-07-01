@@ -1,6 +1,6 @@
 name: aws_request
 description: An AWS request library that creates, signs, and sends aws requests. Currently under development
-version: 0.1.5
+version: 0.1.6
 homepage: https://github.com/Zsmerritt/Flutter_AWS_Request
 
 environment:
