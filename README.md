@@ -13,6 +13,8 @@ If you have feedback or have a use case that isn't covered feel free to contact 
 
 To get start add `aws_request: ^[CURRENT_VERION],` to your `pubspec.yaml`
 
+Import `import 'package:aws_request/aws_request.dart';`
+
 Then create a request: 
 ~~~
 AwsRequest request = new AwsRequest('awsAccessKey', 'awsSecretKey', 'region');
