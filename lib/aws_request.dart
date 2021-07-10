@@ -8,10 +8,12 @@ import 'package:intl/intl.dart';
 
 class AwsRequestException implements Exception {
   String message;
-  String cause; /// deprecated
-  AwsRequestException(String message):
-    this.cause = message,
-    this.message = message;
+  String cause;
+
+  /// deprecated
+  AwsRequestException(String message)
+      : this.cause = message,
+        this.message = message;
 }
 
 class AwsRequest {
