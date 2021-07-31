@@ -1,3 +1,11 @@
+## [0.1.7] - 2021/07/30
+
+* Fixed bug limiting calls to POST requests
+* Fixed bug limiting requests to `logs` service
+* Fixed bug with static signed headers
+* Reformatted files
+* Added QoL service and target values to constructor
+
 ## [0.1.6] - 2021/07/01
 
 * Removed strict flutter sdk version requirement
