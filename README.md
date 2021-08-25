@@ -1,7 +1,6 @@
 # aws_request
 
 A package that generates, signs, sends requests to AWS.  
-**This package is still under development**
 
 The repository can be found [here](https://github.com/Zsmerritt/Flutter_AWS_Request)
 

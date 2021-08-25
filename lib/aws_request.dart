@@ -27,7 +27,6 @@ class AwsRequest {
   String _awsAccessKey;
   String _awsSecretKey;
   String _region;
-  HttpClient _httpClient = new HttpClient();
   static const Map<String, String> _defaultHeaders = {
     'User-Agent': 'Dart (dart:io)',
     'Accept-Encoding': 'gzip, deflate',
@@ -237,15 +236,15 @@ class AwsRequest {
   Future<HttpClientRequest> _getRequest(String type, String url) async {
     switch (type) {
       case 'GET':
-        return await _httpClient.getUrl(Uri.parse(url));
+        return await HttpClient().getUrl(Uri.parse(url));
       case 'POST':
-        return await _httpClient.postUrl(Uri.parse(url));
+        return await HttpClient().postUrl(Uri.parse(url));
       case 'DELETE':
-        return await _httpClient.deleteUrl(Uri.parse(url));
+        return await HttpClient().deleteUrl(Uri.parse(url));
       case 'PATCH':
-        return await _httpClient.patchUrl(Uri.parse(url));
+        return await HttpClient().patchUrl(Uri.parse(url));
       case 'PUT':
-        return await _httpClient.putUrl(Uri.parse(url));
+        return await HttpClient().putUrl(Uri.parse(url));
       default:
         throw AwsRequestException(
             'AwsRequest: ERROR: Request type not supported. '

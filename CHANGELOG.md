@@ -1,3 +1,7 @@
+## [0.1.8] - 2021/08/25
+
+* Fixed issue causing HttpException
+
 ## [0.1.7] - 2021/07/30
 
 * Fixed bug limiting calls to POST requests
