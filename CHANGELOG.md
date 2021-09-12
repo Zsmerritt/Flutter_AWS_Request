@@ -1,3 +1,8 @@
+## [0.1.8] - 2021/09/12
+
+* Added stack trace to AwsRequestException
+* Added optional timeout parameter with a default value of `Duration(seconds: 10)`
+
 ## [0.1.8] - 2021/08/25
 
 * Fixed issue causing HttpException

@@ -9,8 +9,13 @@ import 'package:universal_io/io.dart';
 class AwsRequestException implements Exception {
   String message;
   String cause;
+  StackTrace stackTrace;
 
-  AwsRequestException(String message)
+  /// A custom error to identify AwsRequest errors more easily
+  ///
+  /// message: the cause of the error
+  /// stackTrace: the stack trace of the error
+  AwsRequestException(String message, this.stackTrace)
       : this.cause = message,
         this.message = message;
 }
@@ -27,6 +32,7 @@ class AwsRequest {
   String _awsAccessKey;
   String _awsSecretKey;
   String _region;
+  Duration timeout;
   static const Map<String, String> _defaultHeaders = {
     'User-Agent': 'Dart (dart:io)',
     'Accept-Encoding': 'gzip, deflate',
@@ -41,18 +47,29 @@ class AwsRequest {
     this._region, {
     this.service,
     this.target,
+    this.timeout: const Duration(seconds: 10),
   });
 
   /// Builds, signs, and sends aws http requests.
+  ///
   /// type: request type [GET, POST, PUT, etc]
+  ///
   /// service: aws service you are sending request to
+  ///
   /// target: The api you are targeting (ie Logs_XXXXXXXX.PutLogEvents)
+  ///
   /// signedHeaders: a list of headers aws requires in the signature.
+  ///
   ///    Default included signed headers are: [content-type, host, x-amz-date, x-amz-target]
+  ///
   ///    (You do not need to provide these in headers)
+  ///
   /// headers: any required headers. Any non-default headers included in the signedHeaders must be added here.
+  ///
   /// jsonBody: the body of the request, formatted as json
+  ///
   /// queryPath: the aws query path
+  ///
   /// queryString: the aws query string, formatted like ['abc=123&def=456']. Must be url encoded
   Future<HttpClientResponse> send(
     String type, {
@@ -91,11 +108,13 @@ class AwsRequest {
       if (!signedHeaders.containsKey(key) && headers.containsKey(key)) {
         signedHeaders[key] = headers[key]!;
       } else {
-        throw AwsRequestException('AwsRequest ERROR: Signed Header Not Found: '
+        throw AwsRequestException(
+            'AwsRequest ERROR: Signed Header Not Found: '
             '$key could not be found in the included headers. '
             'Provided header keys are ${headers.keys.toList()}'
             'All headers besides [content-type, host, x-amz-date, x-amz-target] '
-            'that are included in signedHeaders must be included in headers');
+            'that are included in signedHeaders must be included in headers',
+            StackTrace.current);
       }
     }
     if (headers.containsKey('content-type')) {
@@ -190,6 +209,8 @@ class AwsRequest {
       'Accept-Encoding': 'gzip, deflate',
       'Accept': '*/*',
       'Connection': 'keep-alive',
+      'Keep-Alive':
+          'timeout=${timeout.inSeconds > 0 ? timeout.inSeconds : 1}, max=1000',
       'Content-Type': 'application/x-amz-json-1.1',
       'Authorization': auth,
       'X-Amz-Date': amzDate,
@@ -248,7 +269,8 @@ class AwsRequest {
       default:
         throw AwsRequestException(
             'AwsRequest: ERROR: Request type not supported. '
-            'Options are: [GET, POST, DELETE, PATCH, PUT]');
+            'Options are: [GET, POST, DELETE, PATCH, PUT]',
+            StackTrace.current);
     }
   }
 
@@ -273,7 +295,7 @@ class AwsRequest {
     );
     if (!validation['valid']) {
       throw new AwsRequestException(
-          'AwsRequestException: ${validation['error']}');
+          'AwsRequestException: ${validation['error']}', StackTrace.current);
     }
     // create needed variables
     String host = '$service.${this._region}.amazonaws.com';
@@ -324,6 +346,6 @@ class AwsRequest {
 
     // encode body and send request
     request.add(utf8.encode(jsonBody));
-    return await request.close();
+    return await request.close().timeout(timeout);
   }
 }
