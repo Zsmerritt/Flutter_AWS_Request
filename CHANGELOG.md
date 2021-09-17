@@ -1,3 +1,7 @@
+## [0.2.0+1] - 2021/09/17
+
+* Updated package description
+
 ## [0.2.0] - 2021/09/16
 
 * Removed unneeded flutter dependency to allow native and js compatibility
