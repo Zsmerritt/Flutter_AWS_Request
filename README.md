@@ -1,38 +1,89 @@
-# aws_request
+<h1 align="center">
+  aws_request
+</h1>
 
-A package that generates, signs, sends requests to AWS.  
+<p align="center">
+    <a href="https://pub.dev/packages/aws_request">
+        <img alt="Pub Package" src="https://img.shields.io/pub/v/aws_request.svg?logo=dart&logoColor=00b9fc">
+    </a>
+    <a href="https://github.com/Zsmerritt/Flutter_AWS_Request/commits/main">
+        <img alt="Last Commit" src="https://img.shields.io/github/last-commit/Zsmerritt/Flutter_AWS_Request?logo=git&logoColor=white">
+    </a>
+    <a href="https://github.com/Zsmerritt/Flutter_AWS_Request/pulls">
+        <img alt="Pull Requests" src="https://img.shields.io/github/issues-pr/Zsmerritt/Flutter_AWS_Request?logo=github&logoColor=white">
+    </a>
+    <a href="https://github.com/Zsmerritt/Flutter_AWS_Request/issues">
+        <img alt="Open Issues" src="https://img.shields.io/github/issues/Zsmerritt/Flutter_AWS_Request?logo=github&logoColor=white">
+    </a>
+    <a href="https://github.com/Zsmerritt/Flutter_AWS_Request">
+        <img alt="Code size" src="https://img.shields.io/github/languages/code-size/Zsmerritt/Flutter_AWS_Request?logo=github&logoColor=white">
+    </a>
+    <a href="https://github.com/Zsmerritt/Flutter_AWS_Request/blob/main/LICENSE">
+        <img alt="License" src="https://img.shields.io/github/license/Zsmerritt/Flutter_AWS_Request?logo=open-source-initiative&logoColor=blue">
+    </a>
+</p>
 
-The repository can be found [here](https://github.com/Zsmerritt/Flutter_AWS_Request)
+<p align="center">
+    Easily create, sign, and send API requests to AWS.
+</p>
 
-Supported HTTP methods are get, post, delete, patch, put.
+---
 
-If you have feedback or have a use case that isn't covered feel free to contact me.
+<h3 align="center">
+  Resources
+</h3>
+
+<p align="center">
+    <a href="https://pub.dev/documentation/aws_request/latest/aws_request/aws_request-library.html">
+        Documentation
+    </a>
+    &nbsp;
+    &nbsp;
+    &nbsp;
+    <a href="https://pub.dev/packages/aws_request">
+        Pub Package
+    </a>
+    &nbsp;
+    &nbsp;
+    &nbsp;
+    <a href="https://github.com/Zsmerritt/Flutter_AWS_Request">
+        GitHub Repository
+    </a>
+</p>
+
+<p align="center">
+    If you have feedback or have a use case that isn't covered feel free to open an issue.
+</p>
 
 ## Getting Started
 
-To get start add `aws_request: ^[CURRENT_VERION],` to your `pubspec.yaml`
+Create a request and send it!
 
-Import `import 'package:aws_request/aws_request.dart';`
+~~~dart
+import 'package:aws_request/aws_request.dart';
 
-Then create a request: 
-~~~
 AwsRequest request = new AwsRequest('awsAccessKey', 'awsSecretKey', 'region');
+request.send(AwsRequestType.POST);
 ~~~
-Finally send your request by calling `request.send('TYPE');`
 
 The following parameters can be provided to the `send()` function:
+
 ~~~
-type: request type [GET, POST, PUT, etc]
+type: request type (GET, POST, PUT, etc)
 service: aws service you are sending request to
-target: your instance of that service plus the operation [Logs_XXXXXXXX.PutLogEvents]
+target: your instance of that service plus the operation (Logs_XXXXXXXX.PutLogEvents)
 signedHeaders: a list of headers aws requires in the signature.
-   Default included signed headers are: [content-type, host, x-amz-date, x-amz-target]
-   (You do not need to provide these in headers)
-headers: any required headers. Any non-default headers included in the signedHeaders must be added here.
+   Default included signed headers are: (content-type, host, x-amz-date, x-amz-target)
+   (You do not need to provide these in [headers])
+headers: any required headers. Any non-default headers included in the signedHeaders 
+         must be added here.
 jsonBody: the body of the request, formatted as json
 queryPath: the aws query path
-queryString: the aws query string, formatted like ['abc=123&def=456']. Must be url encoded
+queryString: the aws query string, formatted like ('abc=123&def=456'). Must be url encoded
 ~~~
+
+Supported HTTP methods are get, post, delete, patch, put.
+
 ## Examples
 
 Here's an example of using aws_request to send a CloudWatch PutLogEvent request:
@@ -46,17 +97,44 @@ void sendCloudWatchLog(String logString) async {
   String body = """  
             {"logEvents":
               [{
-                "timestamp":${DateTime.now().toUtc().millisecondsSinceEpoch},
+                "timestamp":${DateTime
+      .now()
+      .toUtc()
+      .millisecondsSinceEpoch},
                 "message":"$logString"
               }],
               "logGroupName":"ExampleLogGroupName",
               "logStreamName":"ExampleLogStreamName"
             }""";
   HttpClientResponse result = await request.send(
-    'POST',
+    AwsRequestType.POST,
     jsonBody: body,
-    target: 'Logs_XXXXXXXX.PutLogEvents',
+    target: 'Logs_20140328.PutLogEvents',
     service: 'logs',
   );
 }
 ~~~
+
+## MIT License
+
+```
+Copyright (c) Zachary Merritt
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

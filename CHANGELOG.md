@@ -1,3 +1,11 @@
+## [0.2.0] - 2021/09/16
+
+* Removed unneeded flutter dependency to allow native and js compatibility
+* Refactored some code for better readability
+* Added AwsRequestType enum to replace String request type
+* Removed deprecated `cause` from AwsRequestException 
+* Updated license to MIT
+
 ## [0.1.9] - 2021/09/12
 
 * Added stack trace to AwsRequestException

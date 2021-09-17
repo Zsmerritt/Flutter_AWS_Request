@@ -8,17 +8,31 @@ import 'package:universal_io/io.dart';
 
 class AwsRequestException implements Exception {
   String message;
-  String cause;
   StackTrace stackTrace;
 
   /// A custom error to identify AwsRequest errors more easily
   ///
   /// message: the cause of the error
   /// stackTrace: the stack trace of the error
-  AwsRequestException(String message, this.stackTrace)
-      : this.cause = message,
-        this.message = message;
+  AwsRequestException(this.message, this.stackTrace);
 }
+
+String _awsRequestType(AwsRequestType type) {
+  switch (type) {
+    case AwsRequestType.GET:
+      return 'GET';
+    case AwsRequestType.POST:
+      return 'POST';
+    case AwsRequestType.DELETE:
+      return 'DELETE';
+    case AwsRequestType.PATCH:
+      return 'PATCH';
+    case AwsRequestType.PUT:
+      return 'PUT';
+  }
+}
+
+enum AwsRequestType { GET, POST, DELETE, PATCH, PUT }
 
 class AwsRequest {
   // Public
@@ -29,9 +43,16 @@ class AwsRequest {
   String? target;
 
   // Private
+  /// AWS access key
   String _awsAccessKey;
+
+  /// AWS secret key
   String _awsSecretKey;
+
+  /// The region to send the request to
   String _region;
+
+  /// The timeout on the request
   Duration timeout;
   static const Map<String, String> _defaultHeaders = {
     'User-Agent': 'Dart (dart:io)',
@@ -72,14 +93,14 @@ class AwsRequest {
   ///
   /// queryString: the aws query string, formatted like ['abc=123&def=456']. Must be url encoded
   Future<HttpClientResponse> send(
-    String type, {
+    AwsRequestType type, {
     String? service,
     String? target,
     List<String>? signedHeaders,
     Map<String, String> headers = AwsRequest._defaultHeaders,
     String jsonBody: '',
     String queryPath: '/',
-    String queryString: '',
+    Map<String, dynamic> queryString: const {},
   }) async {
     return _send(
       type: type,
@@ -224,12 +245,14 @@ class AwsRequest {
   String _constructUrl(
     String host,
     String canonicalUri,
-    String canonicalQuerystring,
+    Map<String, dynamic> canonicalQuerystring,
   ) {
-    if (canonicalQuerystring != '') {
-      return 'https://$host$canonicalUri?$canonicalQuerystring';
-    }
-    return 'https://$host$canonicalUri';
+    return Uri(
+      scheme: 'https',
+      host: host,
+      path: canonicalUri,
+      queryParameters: canonicalQuerystring,
+    ).toString();
   }
 
   Map<String, dynamic> _validateRequest(
@@ -254,35 +277,30 @@ class AwsRequest {
     return {'valid': true, 'error': null};
   }
 
-  Future<HttpClientRequest> _getRequest(String type, String url) async {
+  Future<HttpClientRequest> _getRequest(AwsRequestType type, Uri url) async {
     switch (type) {
-      case 'GET':
-        return await HttpClient().getUrl(Uri.parse(url));
-      case 'POST':
-        return await HttpClient().postUrl(Uri.parse(url));
-      case 'DELETE':
-        return await HttpClient().deleteUrl(Uri.parse(url));
-      case 'PATCH':
-        return await HttpClient().patchUrl(Uri.parse(url));
-      case 'PUT':
-        return await HttpClient().putUrl(Uri.parse(url));
-      default:
-        throw AwsRequestException(
-            'AwsRequest: ERROR: Request type not supported. '
-            'Options are: [GET, POST, DELETE, PATCH, PUT]',
-            StackTrace.current);
+      case AwsRequestType.GET:
+        return await HttpClient().getUrl(url);
+      case AwsRequestType.POST:
+        return await HttpClient().postUrl(url);
+      case AwsRequestType.DELETE:
+        return await HttpClient().deleteUrl(url);
+      case AwsRequestType.PATCH:
+        return await HttpClient().patchUrl(url);
+      case AwsRequestType.PUT:
+        return await HttpClient().putUrl(url);
     }
   }
 
   Future<HttpClientResponse> _send({
-    required String type,
+    required AwsRequestType type,
     String? service,
     String? target,
     List<String>? signedHeaders,
     required Map<String, String> headers,
     required String jsonBody,
     required String canonicalUri,
-    required String canonicalQuerystring,
+    required Map<String, dynamic> canonicalQuerystring,
   }) async {
     service ??= this.service;
     target ??= this.target;
@@ -299,10 +317,11 @@ class AwsRequest {
     }
     // create needed variables
     String host = '$service.${this._region}.amazonaws.com';
-    String url = _constructUrl(
-      host,
-      canonicalUri,
-      canonicalQuerystring,
+    Uri url = Uri(
+      scheme: 'https',
+      host: host,
+      path: canonicalUri,
+      queryParameters: canonicalQuerystring,
     );
     String amzDate =
         DateFormat("yyyyMMdd'T'HHmmss'Z'").format(DateTime.now().toUtc());
@@ -316,11 +335,11 @@ class AwsRequest {
 
     // generate canonical request, auth, and headers
     String canonicalRequest = _getCanonicalRequest(
-      type,
+      _awsRequestType(type),
       jsonBody,
       signedHeadersMap,
       canonicalUri,
-      canonicalQuerystring,
+      url.query,
     );
     String auth = _getAuth(
       amzDate,
