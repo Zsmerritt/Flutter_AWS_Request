@@ -1,4 +1,4 @@
-import 'package:aws_request/aws_request.dart';
+import 'package:aws_request/src/aws_request.dart';
 import 'package:test/test.dart';
 
 void main() {

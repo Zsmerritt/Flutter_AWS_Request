@@ -1,3 +1,12 @@
+## [0.3.0] - 2021/10/03
+
+* Refactored project into discrete testable modules
+* Added unit tests for each piece
+* Added MockAwsRequest to mock requests for easier testing
+* Added AUTHORS file
+* Changed primary call methods to be single static call
+* Updated documentation and examples to illustrate new call method
+
 ## [0.2.0+1] - 2021/09/17
 
 * Updated package description

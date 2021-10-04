@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // MIT license that can be found in the LICENSE file.
 
-library AwsRequest;
+library MockAwsRequest;
 
-export 'src/aws_request.dart' show AwsRequest;
+export 'src/mock_aws_request.dart' show MockAwsRequest;
 export 'src/util.dart' show AwsRequestType, AwsRequestException;
