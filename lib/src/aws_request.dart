@@ -1,4 +1,4 @@
-import 'package:universal_io/io.dart';
+import 'package:http/http.dart';
 
 import 'request.dart';
 import 'util.dart';
@@ -25,7 +25,7 @@ class AwsRequest {
   /// queryPath: the aws query path
   ///
   /// queryString: the aws query string, formatted like ['abc=123&def=456']. Must be url encoded
-  Future<HttpClientResponse> send({
+  Future<Response> send({
     required String awsAccessKey,
     required String awsSecretKey,
     required String region,
@@ -36,7 +36,7 @@ class AwsRequest {
     Map<String, String> headers = defaultHeaders,
     String jsonBody: '',
     String queryPath: '/',
-    Map<String, dynamic> queryString: const {},
+    Map<String, dynamic>? queryString,
   }) async {
     return AwsHttpRequest.send(
       awsAccessKey: awsAccessKey,
@@ -49,7 +49,7 @@ class AwsRequest {
       headers: headers,
       jsonBody: jsonBody,
       canonicalUri: queryPath,
-      canonicalQuerystring: queryString,
+      canonicalQuery: queryString,
       timeout: const Duration(seconds: 10),
     );
   }

@@ -21,27 +21,13 @@ class AwsRequestException implements Exception {
   }
 }
 
-String awsRequestType(AwsRequestType type) {
-  switch (type) {
-    case AwsRequestType.GET:
-      return 'GET';
-    case AwsRequestType.POST:
-      return 'POST';
-    case AwsRequestType.DELETE:
-      return 'DELETE';
-    case AwsRequestType.PATCH:
-      return 'PATCH';
-    case AwsRequestType.PUT:
-      return 'PUT';
-  }
-}
-
-enum AwsRequestType { GET, POST, DELETE, PATCH, PUT }
+/// Enum of supported HTTP methods
+enum AwsRequestType { GET, POST, DELETE, PATCH, PUT, HEAD }
 
 /// Default headers included automatically with every request.
 /// These can be overridden by passing in a Map with the same keys
 const Map<String, String> defaultHeaders = {
-  'User-Agent': 'Dart (dart:universal_io)',
+  'User-Agent': 'Dart (dart:http)',
   'Accept-Encoding': 'gzip, deflate',
   'Accept': '*/*',
   'Connection': 'keep-alive',

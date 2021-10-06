@@ -1,10 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:intl/intl.dart';
-import 'package:universal_io/io.dart';
 
 import 'util.dart';
 
@@ -27,7 +27,7 @@ class AwsHttpRequest {
         throw AwsRequestException(
             message: 'AwsRequest ERROR: Signed Header Not Found: '
                 '$key could not be found in the included headers. '
-                'Provided header keys are ${headers.keys.toList()}'
+                'Provided header keys are ${headers.keys.toList()} '
                 'All headers besides [content-type, host, x-amz-date, x-amz-target] '
                 'that are included in signedHeaders must be included in headers',
             stackTrace: StackTrace.current);
@@ -131,43 +131,84 @@ class AwsHttpRequest {
       'Keep-Alive':
           'timeout=${timeout.inSeconds > 0 ? timeout.inSeconds : 1}, max=1000',
       'Content-Type': 'application/x-amz-json-1.1',
-      'Authorization': auth,
-      'X-Amz-Date': amzDate,
-      'x-amz-target': target,
-      'host': host,
-      'content-length': utf8.encode(requestBody).length.toString(),
-      ...headers
+      ...headers,
+      ...{
+        // We never want these keys overwritten
+        'Authorization': auth,
+        'X-Amz-Date': amzDate,
+        'x-amz-target': target,
+        'host': host,
+        'content-length': utf8.encode(requestBody).length.toString(),
+      }
     };
   }
 
-  static Future<HttpClientRequest> getRequest(
+  static Future<Response> getRequest(
     AwsRequestType type,
     Uri url,
-    bool mockRequest,
+    Map<String, String> headers,
+    String body,
+    Duration timeout, {
+    bool mockRequest: false,
     Future<Response> Function(Request)? mockFunction,
-  ) async {
+  }) async {
     if (mockRequest && mockFunction == null) {
-      throw AwsRequestException(
+      throw new AwsRequestException(
         message: 'Mocking function request to mock AwsRequests',
         stackTrace: StackTrace.current,
       );
     }
-    dynamic httpClient = mockRequest ? MockClient(mockFunction!) : HttpClient();
+    dynamic client = mockRequest ? MockClient(mockFunction!) : Client();
+    Future<Response> response;
     switch (type) {
       case AwsRequestType.GET:
-        return await httpClient.getUrl(url);
+        response = client.get(
+          url,
+          headers: headers,
+        );
+        break;
       case AwsRequestType.POST:
-        return await httpClient.postUrl(url);
+        response = client.post(
+          url,
+          headers: headers,
+          body: utf8.encode(body),
+        );
+        break;
       case AwsRequestType.DELETE:
-        return await httpClient.deleteUrl(url);
+        response = client.delete(
+          url,
+          headers: headers,
+          body: utf8.encode(body),
+        );
+        break;
       case AwsRequestType.PATCH:
-        return await httpClient.patchUrl(url);
+        response = client.patch(
+          url,
+          headers: headers,
+          body: utf8.encode(body),
+        );
+        break;
       case AwsRequestType.PUT:
-        return await httpClient.putUrl(url);
+        response = client.put(
+          url,
+          headers: headers,
+          body: utf8.encode(body),
+        );
+        break;
+      case AwsRequestType.HEAD:
+        response = client.head(
+          url,
+          headers: headers,
+        );
+        break;
     }
+    return response.timeout(timeout, onTimeout: () {
+      client.close();
+      throw TimeoutException('AwsRequest Timed Out', timeout);
+    });
   }
 
-  static Future<HttpClientResponse> send({
+  static Future<Response> send({
     required String awsSecretKey,
     required String awsAccessKey,
     required AwsRequestType type,
@@ -179,7 +220,7 @@ class AwsHttpRequest {
     required Map<String, String> headers,
     required String jsonBody,
     required String canonicalUri,
-    required Map<String, dynamic> canonicalQuerystring,
+    Map<String, dynamic>? canonicalQuery,
     bool mockRequest: false,
     Future<Response> Function(Request)? mockFunction,
   }) async {
@@ -188,7 +229,7 @@ class AwsHttpRequest {
       scheme: 'https',
       host: host,
       path: canonicalUri,
-      queryParameters: canonicalQuerystring,
+      queryParameters: canonicalQuery,
     );
     String amzDate =
         DateFormat("yyyyMMdd'T'HHmmss'Z'").format(DateTime.now().toUtc());
@@ -202,7 +243,7 @@ class AwsHttpRequest {
 
     // generate canonical request, auth, and headers
     String canonicalRequest = getCanonicalRequest(
-      awsRequestType(type),
+      type.toString().split('.').last,
       jsonBody,
       signedHeadersMap,
       canonicalUri,
@@ -228,18 +269,14 @@ class AwsHttpRequest {
     );
 
     // generate request and add headers
-    HttpClientRequest request = await getRequest(
+    return await getRequest(
       type,
       url,
-      mockRequest,
-      mockFunction,
+      updatedHeaders,
+      jsonBody,
+      timeout,
+      mockRequest: mockRequest,
+      mockFunction: mockFunction,
     );
-    updatedHeaders.forEach((key, value) {
-      request.headers.set(key, value);
-    });
-
-    // encode body and send request
-    request.add(utf8.encode(jsonBody));
-    return await request.close().timeout(timeout);
   }
 }
