@@ -20,16 +20,6 @@ jobs:
       # - uses: dart-lang/setup-dart@v1
       - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
 
-      # Setup code coverage
-      - uses: actions/setup-java@v1
-        with:
-          java-version: "12.x"
-
-      - uses: stelynx/dart-full-coverage@v1.0.5
-        with:
-          package: egakcap
-          ignore: "*_state.dart, do_not_import_me.dart"
-
       - name: Install dependencies
         run: dart pub get
 
@@ -46,6 +36,9 @@ jobs:
       # want to change this to 'flutter test'.
       - name: Run tests
         run: dart test
+
+      - name: Generate coverage test
+        run: source scripts/coverage_helper.sh aws_request
 
       - name: Collect coverage
         run: flutter test --coverage .
