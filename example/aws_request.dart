@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:aws_request/aws_request.dart';
 
 void sendCloudWatchLog(String logString) async {
@@ -13,8 +11,8 @@ void sendCloudWatchLog(String logString) async {
               "logGroupName":"ExampleLogGroupName",
               "logStreamName":"ExampleLogStreamName"
             }""";
-  HttpClientResponse result = await request.send(
-    'POST',
+  await request.send(
+    AwsRequestType.POST,
     jsonBody: body,
     target: 'Logs_XXXXXXXX.PutLogEvents',
     service: 'logs',
