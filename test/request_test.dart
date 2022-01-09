@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:aws_request/aws_request.dart';
 import 'package:aws_request/src/request.dart';
+import 'package:crypto/crypto.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:test/test.dart';
@@ -200,8 +201,17 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
         '',
         {},
       );
+      String stringToSign = 'AWS4-HMAC-SHA256\n\n$dateStamp///aws4_request\n'
+          '${sha256.convert(utf8.encode('')).toString()}';
+      String signature = AwsHttpRequest.getSignature(
+        '',
+        dateStamp,
+        '',
+        '',
+        stringToSign,
+      );
       expect(
-        'AWS4-HMAC-SHA256 Credential=/$dateStamp///aws4_request, SignedHeaders=, Signature=8d2cf0ee32715f0e09317b55d3d6961d4f47fb5fd7dedbbe9dc8db0a31c07dca',
+        'AWS4-HMAC-SHA256 Credential=/$dateStamp///aws4_request, SignedHeaders=, Signature=$signature',
         auth,
       );
     });
@@ -215,8 +225,18 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
         'service',
         {'signedHeaders': 'signedHeaders'},
       );
+      String stringToSign =
+          'AWS4-HMAC-SHA256\namzDate\n$dateStamp/region/service/aws4_request\n'
+          '${sha256.convert(utf8.encode('canonicalRequest')).toString()}';
+      String signature = AwsHttpRequest.getSignature(
+        'awsSecretKey',
+        dateStamp,
+        'region',
+        'service',
+        stringToSign,
+      );
       expect(
-        'AWS4-HMAC-SHA256 Credential=awsAccessKey/$dateStamp/region/service/aws4_request, SignedHeaders=signedHeaders, Signature=ae34525315a3082d37b4a7e0c2de1d9b499b38a965d1a086b122174e5a249473',
+        'AWS4-HMAC-SHA256 Credential=awsAccessKey/$dateStamp/region/service/aws4_request, SignedHeaders=signedHeaders, Signature=$signature',
         auth,
       );
     });
@@ -234,8 +254,18 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
           'a': 'a',
         },
       );
+      String stringToSign =
+          'AWS4-HMAC-SHA256\namzDate\n$dateStamp/region/service/aws4_request\n'
+          '${sha256.convert(utf8.encode('canonicalRequest')).toString()}';
+      String signature = AwsHttpRequest.getSignature(
+        'awsSecretKey',
+        dateStamp,
+        'region',
+        'service',
+        stringToSign,
+      );
       expect(
-        'AWS4-HMAC-SHA256 Credential=awsAccessKey/$dateStamp/region/service/aws4_request, SignedHeaders=a;b;c, Signature=ae34525315a3082d37b4a7e0c2de1d9b499b38a965d1a086b122174e5a249473',
+        'AWS4-HMAC-SHA256 Credential=awsAccessKey/$dateStamp/region/service/aws4_request, SignedHeaders=a;b;c, Signature=$signature',
         auth,
       );
     });
@@ -254,17 +284,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
       );
       expect(
         {
-          'User-Agent': 'Dart (dart:io)',
-          'Accept-Encoding': 'gzip, deflate',
           'Accept': '*/*',
-          'Connection': 'keep-alive',
-          'Keep-Alive': 'timeout=1, max=1000',
           'Content-Type': 'application/x-amz-json-1.1',
           'Authorization': 'auth',
           'X-Amz-Date': 'amzDate',
           'x-amz-target': 'target',
-          'host': 'host',
-          'content-length': '11',
           'c': 'c',
         },
         res,
@@ -275,17 +299,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
         'host',
         'requestBody',
         {
-          'User-Agent': '',
-          'Accept-Encoding': '',
           'Accept': '',
-          'Connection': '',
-          'Keep-Alive': '',
           'Content-Type': '',
           'Authorization': '',
           'X-Amz-Date': '',
           'x-amz-target': '',
-          'host': '',
-          'content-length': '',
         },
         'target',
         'amzDate',
@@ -294,17 +312,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
       );
       expect(
         {
-          'User-Agent': '',
-          'Accept-Encoding': '',
           'Accept': '',
-          'Connection': '',
-          'Keep-Alive': '',
           'Content-Type': '',
           'Authorization': 'auth',
           'X-Amz-Date': 'amzDate',
           'x-amz-target': 'target',
-          'host': 'host',
-          'content-length': '11',
         },
         res,
       );
@@ -321,17 +333,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
       );
       expect(
         {
-          'User-Agent': 'Dart (dart:io)',
-          'Accept-Encoding': 'gzip, deflate',
           'Accept': '*/*',
-          'Connection': 'keep-alive',
-          'Keep-Alive': 'timeout=123456789, max=1000',
           'Content-Type': 'application/x-amz-json-1.1',
           'Authorization': 'auth',
           'X-Amz-Date': 'amzDate',
           'x-amz-target': 'target',
-          'host': 'host',
-          'content-length': '11',
         },
         res,
       );
@@ -348,17 +354,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
       );
       expect(
         {
-          'User-Agent': 'Dart (dart:io)',
-          'Accept-Encoding': 'gzip, deflate',
           'Accept': '*/*',
-          'Connection': 'keep-alive',
-          'Keep-Alive': 'timeout=1, max=1000',
           'Content-Type': 'application/x-amz-json-1.1',
           'Authorization': 'auth',
           'X-Amz-Date': 'amzDate',
           'x-amz-target': 'target',
-          'host': 'host',
-          'content-length': '11',
         },
         res,
       );

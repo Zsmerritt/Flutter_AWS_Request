@@ -124,21 +124,13 @@ class AwsHttpRequest {
     Duration timeout,
   ) {
     return {
-      'User-Agent': 'Dart (dart:io)',
-      'Accept-Encoding': 'gzip, deflate',
-      'Accept': '*/*',
-      'Connection': 'keep-alive',
-      'Keep-Alive':
-          'timeout=${timeout.inSeconds > 0 ? timeout.inSeconds : 1}, max=1000',
-      'Content-Type': 'application/x-amz-json-1.1',
+      ...defaultHeaders,
       ...headers,
       ...{
         // We never want these keys overwritten
         'Authorization': auth,
         'X-Amz-Date': amzDate,
         'x-amz-target': target,
-        'host': host,
-        'content-length': utf8.encode(requestBody).length.toString(),
       }
     };
   }
