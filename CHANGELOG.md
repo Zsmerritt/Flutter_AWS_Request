@@ -1,11 +1,18 @@
-## [0.3.0] - 2021/10/03
+## [0.3.0] - 2022/01/08
 
+* Migrated from `universal_io` to `http`
 * Refactored project into discrete testable modules
 * Added unit tests for each piece
 * Added MockAwsRequest to mock requests for easier testing
 * Added AUTHORS file
-* Changed primary call methods to be single static call
-* Updated documentation and examples to illustrate new call method
+* Added static version of primary method
+* Updated documentation to illustrate new static call method
+* Added coverage
+* Fixed bug with allowing non String values in queryString
+
+## [0.2.1] - 2022/01/08
+
+* Fixed issue with rejected headers on web
 
 ## [0.2.0+1] - 2021/09/17
 

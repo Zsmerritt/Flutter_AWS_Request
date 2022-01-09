@@ -6,12 +6,6 @@
     <a href="https://pub.dev/packages/aws_request">
         <img alt="Pub Package" src="https://img.shields.io/pub/v/aws_request.svg?logo=dart&logoColor=00b9fc">
     </a>
-    <a href="https://github.com/Zsmerritt/Flutter_AWS_Request/commits/main">
-        <img alt="Last Commit" src="https://img.shields.io/github/last-commit/Zsmerritt/Flutter_AWS_Request?logo=git&logoColor=white">
-    </a>
-    <a href="https://github.com/Zsmerritt/Flutter_AWS_Request/pulls">
-        <img alt="Pull Requests" src="https://img.shields.io/github/issues-pr/Zsmerritt/Flutter_AWS_Request?logo=github&logoColor=white">
-    </a>
     <a href="https://github.com/Zsmerritt/Flutter_AWS_Request/issues">
         <img alt="Open Issues" src="https://img.shields.io/github/issues/Zsmerritt/Flutter_AWS_Request?logo=github&logoColor=white">
     </a>
@@ -20,6 +14,9 @@
     </a>
     <a href="https://github.com/Zsmerritt/Flutter_AWS_Request/blob/main/LICENSE">
         <img alt="License" src="https://img.shields.io/github/license/Zsmerritt/Flutter_AWS_Request?logo=open-source-initiative&logoColor=blue">
+    </a>
+    <a href="https://codecov.io/gh/Zsmerritt/Flutter_AWS_Request">
+        <img alt="Coverage" src="https://codecov.io/gh/Zsmerritt/Flutter_AWS_Request/branch/main/graph/badge.svg?token=RY2QXJVTTW"/>
     </a>
 </p>
 
@@ -79,38 +76,52 @@ headers: any required headers. Any non-default headers included in the signedHea
          must be added here.
 jsonBody: the body of the request, formatted as json
 queryPath: the aws query path
-queryString: the aws query string, formatted like ('abc=123&def=456'). Must be url encoded
+queryString: the url query string as a Map
 ~~~
 
 Supported HTTP methods are get, post, delete, patch, put.
 
-## Examples
+## Example 1
 
 Here's an example of using aws_request to send a CloudWatch PutLogEvent request:
 
 ~~~dart
 import 'package:aws_request/aws_request.dart';
-import 'dart:io';
+import 'package:http/http.dart';
 
-void sendCloudWatchLog(String logString) async {
+void awsRequestFunction(String logString) async {
   AwsRequest request = new AwsRequest('awsAccessKey', 'awsSecretKey', 'region');
-  String body = """  
-            {"logEvents":
-              [{
-                "timestamp":${DateTime
-      .now()
-      .toUtc()
-      .millisecondsSinceEpoch},
-                "message":"$logString"
-              }],
-              "logGroupName":"ExampleLogGroupName",
-              "logStreamName":"ExampleLogStreamName"
-            }""";
-  HttpClientResponse result = await request.send(
+  Response result = await request.send(
     AwsRequestType.POST,
-    jsonBody: body,
+    jsonBody: "{'jsonKey': 'jsonValue'}",
     target: 'Logs_20140328.PutLogEvents',
     service: 'logs',
+    queryString: {'X-Amz-Expires': '10'},
+    headers: {'X-Amz-Security-Token': 'XXXXXXXXXXXX'},
+  );
+}
+~~~
+
+## Example 2
+
+There is also a static method if you find that more useful:
+
+~~~dart
+import 'package:aws_request/aws_request.dart';
+import 'package:http/http.dart';
+
+void awsRequestFunction(String logString) async {
+  
+  Response result = await AwsRequest.staticSend(
+    awsAccessKey: 'awsAccessKey',
+    awsSecretKey: 'awsSecretKey',
+    region: 'region',
+    type: AwsRequestType.POST,
+    jsonBody: "{'jsonKey': 'jsonValue'}",
+    target: 'Logs_20140328.PutLogEvents',
+    service: 'logs',
+    queryString: {'X-Amz-Expires': '10'},
+    headers: {'X-Amz-Security-Token': 'XXXXXXXXXXXX'},
   );
 }
 ~~~

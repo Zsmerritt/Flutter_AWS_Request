@@ -9,7 +9,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  aws_request: 0.2.1
+  aws_request: 0.3.0
+  http: ^0.13.0
 
 dev_dependencies:
   flutter_test:
