@@ -79,7 +79,7 @@ queryPath: the aws query path
 queryString: the url query string as a Map
 ~~~
 
-Supported HTTP methods are get, post, delete, patch, put.
+Supported HTTP methods are GET, POST, DELETE, PATCH, PUT, HEAD.
 
 ## Example 1
 
