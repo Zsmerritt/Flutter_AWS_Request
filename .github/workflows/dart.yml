@@ -41,7 +41,7 @@ jobs:
         run: source scripts/coverage_helper.sh aws_request
 
       - name: Collect coverage
-        run: flutter test --coverage .
+        run: dart test --coverage .
       - uses: codecov/codecov-action@v1.0.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
