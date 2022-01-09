@@ -56,20 +56,21 @@ class MockAwsRequest {
   /// queryPath: the aws query path
   ///
   /// queryString: the aws query string, formatted like ['abc=123&def=456']. Must be url encoded
-  static Future<Response> staticSend(
-      {required String awsAccessKey,
-      required String awsSecretKey,
-      required String region,
-      required String service,
-      required String target,
-      required AwsRequestType type,
-      required Future<Response> Function(Request) mockFunction,
-      List<String> signedHeaders: const [],
-      Map<String, String> headers: defaultHeaders,
-      String jsonBody: '',
-      String queryPath: '/',
-      Map<String, dynamic>? queryString,
-      Duration timeout: const Duration(seconds: 10)}) async {
+  static Future<Response> staticSend({
+    required String awsAccessKey,
+    required String awsSecretKey,
+    required String region,
+    required String service,
+    required String target,
+    required AwsRequestType type,
+    required Future<Response> Function(Request) mockFunction,
+    List<String> signedHeaders: const [],
+    Map<String, String> headers: defaultHeaders,
+    String jsonBody: '',
+    String queryPath: '/',
+    Map<String, dynamic>? queryString,
+    Duration timeout: const Duration(seconds: 10),
+  }) async {
     return AwsHttpRequest.send(
       awsAccessKey: awsAccessKey,
       awsSecretKey: awsSecretKey,
@@ -109,8 +110,8 @@ class MockAwsRequest {
   /// queryPath: the aws query path
   ///
   /// queryString: the aws query string, formatted like ['abc=123&def=456']. Must be url encoded
-  Future<Response> send({
-    required AwsRequestType type,
+  Future<Response> send(
+    AwsRequestType type, {
     String? service,
     String? target,
     List<String> signedHeaders: const [],
