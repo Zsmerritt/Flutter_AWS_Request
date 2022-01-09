@@ -10,7 +10,7 @@ dependencies:
 
   intl: ^0.17.0 # Date Formatting
   crypto: ^3.0.0 # Key Signing
+  http: ^0.13.0 # Send requests
 
 dev_dependencies:
   test: ^1.16.0
-  http: ^0.13.3
