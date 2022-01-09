@@ -55,10 +55,7 @@ class AwsRequest {
   /// The timeout on the request
   Duration timeout;
   static const Map<String, String> _defaultHeaders = {
-    'User-Agent': 'Dart (dart:io)',
-    'Accept-Encoding': 'gzip, deflate',
     'Accept': '*/*',
-    'Connection': 'keep-alive',
     'Content-Type': 'application/x-amz-json-1.1',
   };
 
@@ -226,33 +223,12 @@ class AwsRequest {
     String auth,
   ) {
     return {
-      'User-Agent': 'Dart (dart:io)',
-      'Accept-Encoding': 'gzip, deflate',
-      'Accept': '*/*',
-      'Connection': 'keep-alive',
-      'Keep-Alive':
-          'timeout=${timeout.inSeconds > 0 ? timeout.inSeconds : 1}, max=1000',
-      'Content-Type': 'application/x-amz-json-1.1',
+      ..._defaultHeaders,
       'Authorization': auth,
       'X-Amz-Date': amzDate,
       'x-amz-target': target,
-      'host': host,
-      'content-length': utf8.encode(requestBody).length.toString(),
       ...headers
     };
-  }
-
-  String _constructUrl(
-    String host,
-    String canonicalUri,
-    Map<String, dynamic> canonicalQuerystring,
-  ) {
-    return Uri(
-      scheme: 'https',
-      host: host,
-      path: canonicalUri,
-      queryParameters: canonicalQuerystring,
-    ).toString();
   }
 
   Map<String, dynamic> _validateRequest(

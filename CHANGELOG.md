@@ -1,3 +1,7 @@
+## [0.2.1] - 2022/01/08
+
+* Fixed issue with rejected headers on web
+
 ## [0.2.0+1] - 2021/09/17
 
 * Updated package description
