@@ -40,8 +40,13 @@ jobs:
       - name: Generate coverage test
         run: source scripts/coverage_helper.sh aws_request
 
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
       - name: Collect coverage
-        run: dart test --coverage .
-      - uses: codecov/codecov-action@v1.0.2
+        run: flutter test --coverage .
+      - uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
