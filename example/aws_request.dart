@@ -1,20 +1,14 @@
 import 'package:aws_request/aws_request.dart';
+import 'package:http/http.dart';
 
-void sendCloudWatchLog(String logString) async {
+void awsRequestFunction(String logString) async {
   AwsRequest request = new AwsRequest('awsAccessKey', 'awsSecretKey', 'region');
-  String body = """  
-            {"logEvents":
-              [{
-                "timestamp":${DateTime.now().toUtc().millisecondsSinceEpoch},
-                "message":"$logString"
-              }],
-              "logGroupName":"ExampleLogGroupName",
-              "logStreamName":"ExampleLogStreamName"
-            }""";
-  await request.send(
+  Response result = await request.send(
     AwsRequestType.POST,
-    jsonBody: body,
-    target: 'Logs_XXXXXXXX.PutLogEvents',
+    jsonBody: "{'jsonKey': 'jsonValue'}",
+    target: 'Logs_20140328.PutLogEvents',
     service: 'logs',
+    queryString: {'X-Amz-Expires': '10'},
+    headers: {'X-Amz-Security-Token': 'XXXXXXXXXXXX'},
   );
 }
