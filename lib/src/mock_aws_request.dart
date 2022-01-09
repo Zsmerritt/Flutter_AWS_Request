@@ -68,7 +68,7 @@ class MockAwsRequest {
     Map<String, String> headers: defaultHeaders,
     String jsonBody: '',
     String queryPath: '/',
-    Map<String, dynamic>? queryString,
+    Map<String, String>? queryString,
     Duration timeout: const Duration(seconds: 10),
   }) async {
     return AwsHttpRequest.send(
@@ -109,7 +109,7 @@ class MockAwsRequest {
   ///
   /// queryPath: the aws query path
   ///
-  /// queryString: the aws query string, formatted like ['abc=123&def=456']. Must be url encoded
+  /// queryString: the url query string as a Map
   Future<Response> send(
     AwsRequestType type, {
     String? service,
@@ -118,7 +118,7 @@ class MockAwsRequest {
     Map<String, String> headers = defaultHeaders,
     String jsonBody: '',
     String queryPath: '/',
-    Map<String, dynamic>? queryString,
+    Map<String, String>? queryString,
   }) async {
     // validate request
     Map<String, dynamic> validation = validateRequest(

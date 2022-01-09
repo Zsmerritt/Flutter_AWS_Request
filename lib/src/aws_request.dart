@@ -51,7 +51,7 @@ class AwsRequest {
   ///
   /// queryPath: the aws query path
   ///
-  /// queryString: the aws query string, formatted like ['abc=123&def=456']. Must be url encoded
+  /// queryString:the url query string as a Map
   static Future<Response> staticSend({
     required String awsAccessKey,
     required String awsSecretKey,
@@ -63,7 +63,7 @@ class AwsRequest {
     Map<String, String> headers: defaultHeaders,
     String jsonBody: '',
     String queryPath: '/',
-    Map<String, dynamic>? queryString,
+    Map<String, String>? queryString,
     Duration timeout: const Duration(seconds: 10),
   }) async {
     return AwsHttpRequest.send(
@@ -102,7 +102,7 @@ class AwsRequest {
   ///
   /// queryPath: the aws query path
   ///
-  /// queryString: the aws query string, formatted like ['abc=123&def=456']. Must be url encoded
+  /// queryString: the url query string as a Map
   Future<Response> send(
     AwsRequestType type, {
     String? service,
@@ -111,7 +111,7 @@ class AwsRequest {
     Map<String, String> headers = defaultHeaders,
     String jsonBody: '',
     String queryPath: '/',
-    Map<String, dynamic>? queryString,
+    Map<String, String>? queryString,
   }) async {
     // validate request
     Map<String, dynamic> validation = validateRequest(

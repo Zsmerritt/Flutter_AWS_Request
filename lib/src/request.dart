@@ -212,7 +212,7 @@ class AwsHttpRequest {
     required Map<String, String> headers,
     required String jsonBody,
     required String canonicalUri,
-    Map<String, dynamic>? canonicalQuery,
+    Map<String, String>? canonicalQuery,
     bool mockRequest: false,
     Future<Response> Function(Request)? mockFunction,
   }) async {
