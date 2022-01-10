@@ -15,6 +15,9 @@
     <a href="https://github.com/Zsmerritt/Flutter_AWS_Request/blob/main/LICENSE">
         <img alt="License" src="https://img.shields.io/github/license/Zsmerritt/Flutter_AWS_Request?logo=open-source-initiative&logoColor=blue">
     </a>
+    <a href="https://github.com/Zsmerritt/Flutter_AWS_Request/actions/workflows/dart.yml">
+        <img alt="CI pipeline status" src="https://github.com/Zsmerritt/Flutter_AWS_Request/actions/workflows/dart.yml/badge.svg">
+    </a>
     <a href="https://codecov.io/gh/Zsmerritt/Flutter_AWS_Request">
         <img alt="Coverage" src="https://codecov.io/gh/Zsmerritt/Flutter_AWS_Request/branch/main/graph/badge.svg?token=RY2QXJVTTW"/>
     </a>
