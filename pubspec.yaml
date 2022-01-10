@@ -1,6 +1,6 @@
 name: aws_request
 description: Easily create, sign, and send API requests to AWS services without the hassle of implimenting Signature Version 4.
-version: 0.2.1
+version: 0.3.0+1
 homepage: https://github.com/Zsmerritt/Flutter_AWS_Request
 
 environment:

@@ -1,3 +1,10 @@
+## [0.3.0+1] - 2022/01/09
+
+* Added more unit tests
+* Added note about Android permissions to readme
+* Incremented mid version for github
+* Added optional timeout argument to `AwsRequest.send` that overrides constructor timeout
+
 ## [0.3.0] - 2022/01/08
 
 * Migrated from `universal_io` to `http`

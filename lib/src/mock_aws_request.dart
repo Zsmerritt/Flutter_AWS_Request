@@ -35,7 +35,7 @@ class MockAwsRequest {
     this.timeout: const Duration(seconds: 10),
   });
 
-  /// Statically Builds, signs, and sends aws http requests.
+  /// Statically Builds, signs, and mocks an aws http request.
   ///
   /// type: request type [GET, POST, PUT, etc]
   ///
@@ -89,7 +89,7 @@ class MockAwsRequest {
     );
   }
 
-  /// Builds, signs, and sends aws http requests.
+  /// Builds, signs, and mocks aws http requests.
   ///
   /// type: request type [GET, POST, PUT, etc]
   ///
@@ -110,6 +110,8 @@ class MockAwsRequest {
   /// queryPath: the aws query path
   ///
   /// queryString: the url query string as a Map
+  ///
+  /// timeout: overrides constructor request timeout
   Future<Response> send(
     AwsRequestType type, {
     String? service,
@@ -119,6 +121,7 @@ class MockAwsRequest {
     String jsonBody: '',
     String queryPath: '/',
     Map<String, String>? queryString,
+    Duration? timeout,
   }) async {
     // validate request
     Map<String, dynamic> validation = validateRequest(
@@ -142,7 +145,7 @@ class MockAwsRequest {
       jsonBody: jsonBody,
       canonicalUri: queryPath,
       canonicalQuery: queryString,
-      timeout: timeout,
+      timeout: timeout ?? this.timeout,
       mockRequest: true,
       mockFunction: mockFunction,
     );

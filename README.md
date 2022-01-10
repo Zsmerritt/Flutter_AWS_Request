@@ -81,7 +81,18 @@ queryString: the url query string as a Map
 
 Supported HTTP methods are GET, POST, DELETE, PATCH, PUT, HEAD.
 
-## Example 1
+## Important Notes:
+
+### Android
+If running on android, make sure you have
+
+`<uses-permission android:name="android.permission.INTERNET" />`
+
+in your app's `android/app/src/main/AndroidManifest.xml`
+
+## Examples
+
+### Example 1
 
 Here's an example of using aws_request to send a CloudWatch PutLogEvent request:
 
@@ -102,7 +113,7 @@ void awsRequestFunction(String logString) async {
 }
 ~~~
 
-## Example 2
+### Example 2
 
 There is also a static method if you find that more useful:
 

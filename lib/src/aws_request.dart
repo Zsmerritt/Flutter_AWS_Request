@@ -103,6 +103,8 @@ class AwsRequest {
   /// queryPath: the aws query path
   ///
   /// queryString: the url query string as a Map
+  ///
+  /// timeout: overrides constructor request timeout
   Future<Response> send(
     AwsRequestType type, {
     String? service,
@@ -112,6 +114,7 @@ class AwsRequest {
     String jsonBody: '',
     String queryPath: '/',
     Map<String, String>? queryString,
+    Duration? timeout,
   }) async {
     // validate request
     Map<String, dynamic> validation = validateRequest(
@@ -135,7 +138,7 @@ class AwsRequest {
       jsonBody: jsonBody,
       canonicalUri: queryPath,
       canonicalQuery: queryString,
-      timeout: timeout,
+      timeout: timeout ?? this.timeout,
     );
   }
 }

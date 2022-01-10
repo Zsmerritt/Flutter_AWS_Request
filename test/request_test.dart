@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:aws_request/aws_request.dart';
@@ -502,116 +503,141 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
 
   group('send', () {
     Future<Response> mockFunction(Request request) async {
+      await Future.delayed(Duration(milliseconds: 1));
       return Response(request.method, 500);
     }
 
-    test('GET', () {
-      return AwsHttpRequest.send(
-        awsSecretKey: 'awsSecretKey',
-        awsAccessKey: 'awsAccessKey',
-        type: AwsRequestType.GET,
-        service: 'service',
-        target: 'target',
-        region: 'region',
-        timeout: Duration(),
-        headers: {},
-        jsonBody: 'jsonBody',
-        canonicalUri: 'canonicalUri',
-        mockRequest: true,
-        mockFunction: mockFunction,
-      ).then((val) {
-        expect(val.body, 'GET');
+    group('HTTP Methods', () {
+      test('GET', () {
+        return AwsHttpRequest.send(
+          awsSecretKey: 'awsSecretKey',
+          awsAccessKey: 'awsAccessKey',
+          type: AwsRequestType.GET,
+          service: 'service',
+          target: 'target',
+          region: 'region',
+          timeout: Duration(seconds: 10),
+          headers: {},
+          jsonBody: 'jsonBody',
+          canonicalUri: 'canonicalUri',
+          mockRequest: true,
+          mockFunction: mockFunction,
+        ).then((val) {
+          expect(val.body, 'GET');
+        });
+      });
+      test('POST', () {
+        return AwsHttpRequest.send(
+          awsSecretKey: 'awsSecretKey',
+          awsAccessKey: 'awsAccessKey',
+          type: AwsRequestType.POST,
+          service: 'service',
+          target: 'target',
+          region: 'region',
+          timeout: Duration(seconds: 10),
+          headers: {},
+          jsonBody: 'jsonBody',
+          canonicalUri: 'canonicalUri',
+          mockRequest: true,
+          mockFunction: mockFunction,
+        ).then((val) {
+          expect(val.body, 'POST');
+        });
+      });
+      test('DELETE', () {
+        return AwsHttpRequest.send(
+          awsSecretKey: 'awsSecretKey',
+          awsAccessKey: 'awsAccessKey',
+          type: AwsRequestType.DELETE,
+          service: 'service',
+          target: 'target',
+          region: 'region',
+          timeout: Duration(seconds: 10),
+          headers: {},
+          jsonBody: 'jsonBody',
+          canonicalUri: 'canonicalUri',
+          mockRequest: true,
+          mockFunction: mockFunction,
+        ).then((val) {
+          expect(val.body, 'DELETE');
+        });
+      });
+      test('PUT', () {
+        return AwsHttpRequest.send(
+          awsSecretKey: 'awsSecretKey',
+          awsAccessKey: 'awsAccessKey',
+          type: AwsRequestType.PUT,
+          service: 'service',
+          target: 'target',
+          region: 'region',
+          timeout: Duration(seconds: 10),
+          headers: {},
+          jsonBody: 'jsonBody',
+          canonicalUri: 'canonicalUri',
+          mockRequest: true,
+          mockFunction: mockFunction,
+        ).then((val) {
+          expect(val.body, 'PUT');
+        });
+      });
+      test('PATCH', () {
+        return AwsHttpRequest.send(
+          awsSecretKey: 'awsSecretKey',
+          awsAccessKey: 'awsAccessKey',
+          type: AwsRequestType.PATCH,
+          service: 'service',
+          target: 'target',
+          region: 'region',
+          timeout: Duration(seconds: 10),
+          headers: {},
+          jsonBody: 'jsonBody',
+          canonicalUri: 'canonicalUri',
+          mockRequest: true,
+          mockFunction: mockFunction,
+        ).then((val) {
+          expect(val.body, 'PATCH');
+        });
+      });
+      test('HEAD', () {
+        return AwsHttpRequest.send(
+          awsSecretKey: 'awsSecretKey',
+          awsAccessKey: 'awsAccessKey',
+          type: AwsRequestType.HEAD,
+          service: 'service',
+          target: 'target',
+          region: 'region',
+          timeout: Duration(seconds: 10),
+          headers: {},
+          jsonBody: 'jsonBody',
+          canonicalUri: 'canonicalUri',
+          mockRequest: true,
+          mockFunction: mockFunction,
+        ).then((val) {
+          expect(val.body, 'HEAD');
+        });
       });
     });
-    test('POST', () {
-      return AwsHttpRequest.send(
-        awsSecretKey: 'awsSecretKey',
-        awsAccessKey: 'awsAccessKey',
-        type: AwsRequestType.POST,
-        service: 'service',
-        target: 'target',
-        region: 'region',
-        timeout: Duration(),
-        headers: {},
-        jsonBody: 'jsonBody',
-        canonicalUri: 'canonicalUri',
-        mockRequest: true,
-        mockFunction: mockFunction,
-      ).then((val) {
-        expect(val.body, 'POST');
-      });
-    });
-    test('DELETE', () {
-      return AwsHttpRequest.send(
-        awsSecretKey: 'awsSecretKey',
-        awsAccessKey: 'awsAccessKey',
-        type: AwsRequestType.DELETE,
-        service: 'service',
-        target: 'target',
-        region: 'region',
-        timeout: Duration(),
-        headers: {},
-        jsonBody: 'jsonBody',
-        canonicalUri: 'canonicalUri',
-        mockRequest: true,
-        mockFunction: mockFunction,
-      ).then((val) {
-        expect(val.body, 'DELETE');
-      });
-    });
-    test('PUT', () {
-      return AwsHttpRequest.send(
-        awsSecretKey: 'awsSecretKey',
-        awsAccessKey: 'awsAccessKey',
-        type: AwsRequestType.PUT,
-        service: 'service',
-        target: 'target',
-        region: 'region',
-        timeout: Duration(),
-        headers: {},
-        jsonBody: 'jsonBody',
-        canonicalUri: 'canonicalUri',
-        mockRequest: true,
-        mockFunction: mockFunction,
-      ).then((val) {
-        expect(val.body, 'PUT');
-      });
-    });
-    test('PATCH', () {
-      return AwsHttpRequest.send(
-        awsSecretKey: 'awsSecretKey',
-        awsAccessKey: 'awsAccessKey',
-        type: AwsRequestType.PATCH,
-        service: 'service',
-        target: 'target',
-        region: 'region',
-        timeout: Duration(),
-        headers: {},
-        jsonBody: 'jsonBody',
-        canonicalUri: 'canonicalUri',
-        mockRequest: true,
-        mockFunction: mockFunction,
-      ).then((val) {
-        expect(val.body, 'PATCH');
-      });
-    });
-    test('HEAD', () {
-      return AwsHttpRequest.send(
-        awsSecretKey: 'awsSecretKey',
-        awsAccessKey: 'awsAccessKey',
-        type: AwsRequestType.HEAD,
-        service: 'service',
-        target: 'target',
-        region: 'region',
-        timeout: Duration(),
-        headers: {},
-        jsonBody: 'jsonBody',
-        canonicalUri: 'canonicalUri',
-        mockRequest: true,
-        mockFunction: mockFunction,
-      ).then((val) {
-        expect(val.body, 'HEAD');
-      });
+    test('Timeout', () async {
+      try {
+        await AwsHttpRequest.send(
+          awsSecretKey: 'awsSecretKey',
+          awsAccessKey: 'awsAccessKey',
+          type: AwsRequestType.HEAD,
+          service: 'service',
+          target: 'target',
+          region: 'region',
+          timeout: Duration(microseconds: 0),
+          headers: {},
+          jsonBody: 'jsonBody',
+          canonicalUri: 'canonicalUri',
+          mockRequest: true,
+          mockFunction: mockFunction,
+        );
+      } catch (e) {
+        expect(e, isA<TimeoutException>());
+        return;
+      }
+      fail('Timeout did not occur!');
     });
   });
 }
