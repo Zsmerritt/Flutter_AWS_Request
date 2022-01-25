@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 void main() {
   group('constructors', () {
     test('minimum constructor', () {
-      AwsRequest awsRequest = new AwsRequest(
+      final AwsRequest awsRequest = AwsRequest(
         'awsAccessKey',
         'awsSecretKey',
         'region',
@@ -17,13 +17,13 @@ void main() {
       expect(awsRequest.timeout.inSeconds, 10);
     });
     test('maximum constructor', () {
-      AwsRequest awsRequest = new AwsRequest(
+      final AwsRequest awsRequest = AwsRequest(
         'awsAccessKey',
         'awsSecretKey',
         'region',
         service: 'service',
         target: 'target',
-        timeout: Duration(seconds: 100),
+        timeout: const Duration(seconds: 100),
       );
       expect(awsRequest.awsAccessKey, 'awsAccessKey');
       expect(awsRequest.awsSecretKey, 'awsSecretKey');
@@ -43,7 +43,7 @@ void main() {
             region: 'region',
             service: 'service',
             target: 'target',
-            type: AwsRequestType.GET,
+            type: AwsRequestType.get,
           );
         } catch (e) {
           expect(e.toString().contains('Failed host lookup'), true);
@@ -59,13 +59,13 @@ void main() {
             region: 'region',
             service: 'service',
             target: 'target',
-            type: AwsRequestType.GET,
+            type: AwsRequestType.get,
             signedHeaders: ['a'],
             headers: {'a': 'a'},
             jsonBody: '{"test":"true"}',
             queryPath: '/',
-            queryString: {"test": "true"},
-            timeout: Duration(seconds: 5),
+            queryString: {'test': 'true'},
+            timeout: const Duration(seconds: 5),
           );
         } catch (e) {
           expect(e.toString().contains('Failed host lookup'), true);
@@ -77,13 +77,13 @@ void main() {
     group('send', () {
       test('fail validation', () async {
         try {
-          AwsRequest awsRequest = new AwsRequest(
+          final AwsRequest awsRequest = AwsRequest(
             'awsAccessKey',
             'awsSecretKey',
             'region',
           );
           await awsRequest.send(
-            AwsRequestType.GET,
+            AwsRequestType.get,
           );
         } catch (e) {
           expect(e, isA<AwsRequestException>());
@@ -93,7 +93,7 @@ void main() {
       });
       test('pass validation - values in constructor', () async {
         try {
-          AwsRequest awsRequest = new AwsRequest(
+          final AwsRequest awsRequest = AwsRequest(
             'awsAccessKey',
             'awsSecretKey',
             'region',
@@ -101,7 +101,7 @@ void main() {
             target: 'target',
           );
           await awsRequest.send(
-            AwsRequestType.GET,
+            AwsRequestType.get,
           );
         } catch (e) {
           expect(e.toString().contains('Failed host lookup'), true);
@@ -111,13 +111,13 @@ void main() {
       });
       test('pass validation - values in function', () async {
         try {
-          AwsRequest awsRequest = new AwsRequest(
+          final AwsRequest awsRequest = AwsRequest(
             'awsAccessKey',
             'awsSecretKey',
             'region',
           );
           await awsRequest.send(
-            AwsRequestType.GET,
+            AwsRequestType.get,
             service: 'service',
             target: 'target',
           );
@@ -129,7 +129,7 @@ void main() {
       });
       test('pass validation - values in both', () async {
         try {
-          AwsRequest awsRequest = new AwsRequest(
+          final AwsRequest awsRequest = AwsRequest(
             'awsAccessKey',
             'awsSecretKey',
             'region',
@@ -137,7 +137,7 @@ void main() {
             target: 'target_1',
           );
           await awsRequest.send(
-            AwsRequestType.GET,
+            AwsRequestType.get,
             service: 'service',
             target: 'target',
           );
@@ -149,15 +149,15 @@ void main() {
       });
       test('pass validation - values set later', () async {
         try {
-          AwsRequest awsRequest = new AwsRequest(
+          final AwsRequest awsRequest = AwsRequest(
             'awsAccessKey',
             'awsSecretKey',
             'region',
-          );
-          awsRequest.service = 'service';
-          awsRequest.target = 'target';
+          )
+            ..service = 'service'
+            ..target = 'target';
           await awsRequest.send(
-            AwsRequestType.GET,
+            AwsRequestType.get,
           );
         } catch (e) {
           expect(e.toString().contains('Failed host lookup'), true);
@@ -167,21 +167,21 @@ void main() {
       });
       test('maximum', () async {
         try {
-          AwsRequest awsRequest = new AwsRequest(
+          final AwsRequest awsRequest = AwsRequest(
             'awsAccessKey',
             'awsSecretKey',
             'region',
           );
           await awsRequest.send(
-            AwsRequestType.GET,
+            AwsRequestType.get,
             service: 'service',
             target: 'target',
             signedHeaders: ['a'],
             headers: {'a': 'a'},
             jsonBody: '{"test":"true"}',
             queryPath: '/',
-            queryString: {"test": "true"},
-            timeout: Duration(seconds: 5),
+            queryString: {'test': 'true'},
+            timeout: const Duration(seconds: 5),
           );
         } catch (e) {
           expect(e.toString().contains('Failed host lookup'), true);

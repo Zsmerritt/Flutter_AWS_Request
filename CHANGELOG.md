@@ -1,3 +1,13 @@
+## [0.4.0] - 2022/01/24
+
+### Breaking Changes: 
+* AwsRequestTypes have been lower cased to conform with dart conventions
+
+### Changes:
+
+* Added stricter analysis options
+* Refactored AwsRequest and MockAwsRequest
+
 ## [0.3.0+1] - 2022/01/09
 
 * Added more unit tests

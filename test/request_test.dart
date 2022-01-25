@@ -18,7 +18,7 @@ void main() {
         'signed_header': 'signed_header',
         'content-type': 'application/x-amz-json-1.1'
       };
-      Map<String, String> generatedSignedHeaders =
+      final Map<String, String> generatedSignedHeaders =
           AwsHttpRequest.getSignedHeaders(
         {
           'signed_header': 'signed_header',
@@ -59,7 +59,7 @@ void main() {
         'signed_header': 'signed_header',
         'content-type': 'content-type'
       };
-      Map<String, String> generatedSignedHeaders =
+      final Map<String, String> generatedSignedHeaders =
           AwsHttpRequest.getSignedHeaders(
         {
           'signed_header': 'signed_header',
@@ -77,7 +77,7 @@ void main() {
 
   group('sign', () {
     test('bytes', () {
-      List<int> result =
+      final List<int> result =
           AwsHttpRequest.sign(utf8.encode('AWS4KEY'), 'stringMessage');
       expect([
         106,
@@ -116,7 +116,7 @@ void main() {
     });
 
     test('hex', () {
-      String result2 = AwsHttpRequest.sign(
+      final String result2 = AwsHttpRequest.sign(
         utf8.encode('AWS4KEY'),
         'stringMessage',
         hex: true,
@@ -129,7 +129,7 @@ void main() {
   });
 
   test('getSignature', () {
-    String signature = AwsHttpRequest.getSignature(
+    final String signature = AwsHttpRequest.getSignature(
       'key',
       'dateStamp',
       'regionName',
@@ -144,7 +144,7 @@ void main() {
 
   group('getCanonicalRequest', () {
     test('getCanonicalRequest - 1', () {
-      String requestString = AwsHttpRequest.getCanonicalRequest(
+      final String requestString = AwsHttpRequest.getCanonicalRequest(
         'type',
         'requestBody',
         {'signedHeaderKey': 'signedHeaderValue'},
@@ -152,18 +152,19 @@ void main() {
         'canonicalQuerystring=canonicalQuerystring',
       );
       expect(
-        """type
+        '''
+type
 canonical/Uri
 canonicalQuerystring=canonicalQuerystring
 signedHeaderKey:signedHeaderValue
 
 signedHeaderKey
-fcf523fac03a2e3a814b7f97bf8c9533d657677c72ff3870afd69cef3b559c60""",
+fcf523fac03a2e3a814b7f97bf8c9533d657677c72ff3870afd69cef3b559c60''',
         requestString,
       );
     });
     test('getCanonicalRequest - 2', () {
-      String requestString = AwsHttpRequest.getCanonicalRequest(
+      final String requestString = AwsHttpRequest.getCanonicalRequest(
         'type',
         '',
         {
@@ -175,7 +176,8 @@ fcf523fac03a2e3a814b7f97bf8c9533d657677c72ff3870afd69cef3b559c60""",
         '/',
       );
       expect(
-        """type
+        '''
+type
 canonical/Uri
 /
 signedHeaderKey1:signedHeaderValue1
@@ -183,17 +185,18 @@ signedHeaderKey2:signedHeaderValue2
 signedHeaderKey:signedHeaderValue
 
 signedHeaderKey;signedHeaderKey1;signedHeaderKey2
-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
         requestString,
       );
     });
   });
 
   group('getAuth', () {
-    String dateStamp = DateFormat('yyyyMMdd').format(DateTime.now().toUtc());
+    final String dateStamp =
+        DateFormat('yyyyMMdd').format(DateTime.now().toUtc());
 
     test('empty', () {
-      String auth = AwsHttpRequest.getAuth(
+      final String auth = AwsHttpRequest.getAuth(
         '',
         '',
         '',
@@ -202,9 +205,10 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
         '',
         {},
       );
-      String stringToSign = 'AWS4-HMAC-SHA256\n\n$dateStamp///aws4_request\n'
+      final String stringToSign =
+          'AWS4-HMAC-SHA256\n\n$dateStamp///aws4_request\n'
           '${sha256.convert(utf8.encode('')).toString()}';
-      String signature = AwsHttpRequest.getSignature(
+      final String signature = AwsHttpRequest.getSignature(
         '',
         dateStamp,
         '',
@@ -217,7 +221,7 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
       );
     });
     test('strings', () {
-      String auth = AwsHttpRequest.getAuth(
+      final String auth = AwsHttpRequest.getAuth(
         'awsSecretKey',
         'awsAccessKey',
         'amzDate',
@@ -226,10 +230,10 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
         'service',
         {'signedHeaders': 'signedHeaders'},
       );
-      String stringToSign =
+      final String stringToSign =
           'AWS4-HMAC-SHA256\namzDate\n$dateStamp/region/service/aws4_request\n'
           '${sha256.convert(utf8.encode('canonicalRequest')).toString()}';
-      String signature = AwsHttpRequest.getSignature(
+      final String signature = AwsHttpRequest.getSignature(
         'awsSecretKey',
         dateStamp,
         'region',
@@ -242,7 +246,7 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
       );
     });
     test('headers unsorted', () {
-      String auth = AwsHttpRequest.getAuth(
+      final String auth = AwsHttpRequest.getAuth(
         'awsSecretKey',
         'awsAccessKey',
         'amzDate',
@@ -255,10 +259,10 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
           'a': 'a',
         },
       );
-      String stringToSign =
+      final String stringToSign =
           'AWS4-HMAC-SHA256\namzDate\n$dateStamp/region/service/aws4_request\n'
           '${sha256.convert(utf8.encode('canonicalRequest')).toString()}';
-      String signature = AwsHttpRequest.getSignature(
+      final String signature = AwsHttpRequest.getSignature(
         'awsSecretKey',
         dateStamp,
         'region',
@@ -274,14 +278,14 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
 
   group('getHeaders', () {
     test('strings', () {
-      Map<String, String> res = AwsHttpRequest.getHeaders(
+      final Map<String, String> res = AwsHttpRequest.getHeaders(
         'host',
         'requestBody',
         {'c': 'c'},
         'target',
         'amzDate',
         'auth',
-        Duration(),
+        const Duration(),
       );
       expect(
         {
@@ -296,7 +300,7 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
       );
     });
     test('overwrite string', () {
-      Map<String, String> res = AwsHttpRequest.getHeaders(
+      final Map<String, String> res = AwsHttpRequest.getHeaders(
         'host',
         'requestBody',
         {
@@ -309,7 +313,7 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
         'target',
         'amzDate',
         'auth',
-        Duration(),
+        const Duration(),
       );
       expect(
         {
@@ -323,14 +327,14 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
       );
     });
     test('increased timeout', () {
-      Map<String, String> res = AwsHttpRequest.getHeaders(
+      final Map<String, String> res = AwsHttpRequest.getHeaders(
         'host',
         'requestBody',
         {},
         'target',
         'amzDate',
         'auth',
-        Duration(seconds: 123456789),
+        const Duration(seconds: 123456789),
       );
       expect(
         {
@@ -344,14 +348,14 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
       );
     });
     test('increased timeout', () {
-      Map<String, String> res = AwsHttpRequest.getHeaders(
+      final Map<String, String> res = AwsHttpRequest.getHeaders(
         'host',
         'requestBody',
         {},
         'target',
         'amzDate',
         'auth',
-        Duration(milliseconds: 10),
+        const Duration(milliseconds: 10),
       );
       expect(
         {
@@ -369,66 +373,66 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
   group('getRequest', () {
     test('AwsRequestType.DELETE', () {
       return AwsHttpRequest.getRequest(
-        AwsRequestType.DELETE,
+        AwsRequestType.delete,
         Uri.parse('https://www.google.com'),
         {},
         '',
-        Duration(seconds: 10),
+        const Duration(seconds: 10),
       ).then((value) {}, onError: (err) {
         fail('Missing type! AwsRequestType.DELETE, $err');
       });
     });
     test('AwsRequestType.GET', () {
       return AwsHttpRequest.getRequest(
-        AwsRequestType.GET,
+        AwsRequestType.get,
         Uri.parse('https://www.google.com'),
         {},
         '',
-        Duration(seconds: 10),
+        const Duration(seconds: 10),
       ).then((value) {}, onError: (err) {
         fail('Missing type! AwsRequestType.GET, $err');
       });
     });
     test('AwsRequestType.HEAD', () {
       return AwsHttpRequest.getRequest(
-        AwsRequestType.HEAD,
+        AwsRequestType.head,
         Uri.parse('https://www.google.com'),
         {},
         '',
-        Duration(seconds: 10),
+        const Duration(seconds: 10),
       ).then((value) {}, onError: (err) {
         fail('Missing type! AwsRequestType.HEAD, $err');
       });
     });
     test('AwsRequestType.PATCH', () {
       return AwsHttpRequest.getRequest(
-        AwsRequestType.PATCH,
+        AwsRequestType.patch,
         Uri.parse('https://www.google.com'),
         {},
         '',
-        Duration(seconds: 10),
+        const Duration(seconds: 10),
       ).then((value) {}, onError: (err) {
         fail('Missing type! AwsRequestType.PATCH, $err');
       });
     });
     test('AwsRequestType.POST', () {
       return AwsHttpRequest.getRequest(
-        AwsRequestType.POST,
+        AwsRequestType.post,
         Uri.parse('https://www.google.com'),
         {},
         '',
-        Duration(seconds: 10),
+        const Duration(seconds: 10),
       ).then((value) {}, onError: (err) {
         fail('Missing type! AwsRequestType.POST, $err');
       });
     });
     test('AwsRequestType.PUT', () {
       return AwsHttpRequest.getRequest(
-        AwsRequestType.PUT,
+        AwsRequestType.put,
         Uri.parse('https://www.google.com'),
         {},
         '',
-        Duration(seconds: 10),
+        const Duration(seconds: 10),
       ).then((value) {}, onError: (err) {
         fail('Missing type! AwsRequestType.PUT, $err');
       });
@@ -436,11 +440,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
 
     test('failure', () {
       return AwsHttpRequest.getRequest(
-        AwsRequestType.GET,
+        AwsRequestType.get,
         Uri.parse('https://www.google.com'),
         {},
         '',
-        Duration(seconds: 10),
+        const Duration(seconds: 10),
         mockRequest: true,
       ).then((val) {
         fail('Mock client not detected!');
@@ -456,11 +460,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
       }
 
       return AwsHttpRequest.getRequest(
-        AwsRequestType.GET,
+        AwsRequestType.get,
         Uri.parse('https://www.google.com'),
         {},
         '',
-        Duration(seconds: 10),
+        const Duration(seconds: 10),
         mockFunction: mockFunction,
       ).then((val) {}, onError: (err) {
         fail(err);
@@ -473,15 +477,15 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
       }
 
       return AwsHttpRequest.getRequest(
-        AwsRequestType.GET,
+        AwsRequestType.get,
         Uri.parse('https://www.google.com'),
         {},
         '',
-        Duration(seconds: 10),
+        const Duration(seconds: 10),
         mockFunction: mockFunction,
         mockRequest: true,
       ).then((val) {
-        Request request = Request(
+        final Request request = Request(
           'GET',
           Uri.parse('https://www.google.com'),
         );
@@ -512,11 +516,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
         return AwsHttpRequest.send(
           awsSecretKey: 'awsSecretKey',
           awsAccessKey: 'awsAccessKey',
-          type: AwsRequestType.GET,
+          type: AwsRequestType.get,
           service: 'service',
           target: 'target',
           region: 'region',
-          timeout: Duration(seconds: 10),
+          timeout: const Duration(seconds: 10),
           headers: {},
           jsonBody: 'jsonBody',
           canonicalUri: 'canonicalUri',
@@ -530,11 +534,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
         return AwsHttpRequest.send(
           awsSecretKey: 'awsSecretKey',
           awsAccessKey: 'awsAccessKey',
-          type: AwsRequestType.POST,
+          type: AwsRequestType.post,
           service: 'service',
           target: 'target',
           region: 'region',
-          timeout: Duration(seconds: 10),
+          timeout: const Duration(seconds: 10),
           headers: {},
           jsonBody: 'jsonBody',
           canonicalUri: 'canonicalUri',
@@ -548,11 +552,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
         return AwsHttpRequest.send(
           awsSecretKey: 'awsSecretKey',
           awsAccessKey: 'awsAccessKey',
-          type: AwsRequestType.DELETE,
+          type: AwsRequestType.delete,
           service: 'service',
           target: 'target',
           region: 'region',
-          timeout: Duration(seconds: 10),
+          timeout: const Duration(seconds: 10),
           headers: {},
           jsonBody: 'jsonBody',
           canonicalUri: 'canonicalUri',
@@ -566,11 +570,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
         return AwsHttpRequest.send(
           awsSecretKey: 'awsSecretKey',
           awsAccessKey: 'awsAccessKey',
-          type: AwsRequestType.PUT,
+          type: AwsRequestType.put,
           service: 'service',
           target: 'target',
           region: 'region',
-          timeout: Duration(seconds: 10),
+          timeout: const Duration(seconds: 10),
           headers: {},
           jsonBody: 'jsonBody',
           canonicalUri: 'canonicalUri',
@@ -584,11 +588,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
         return AwsHttpRequest.send(
           awsSecretKey: 'awsSecretKey',
           awsAccessKey: 'awsAccessKey',
-          type: AwsRequestType.PATCH,
+          type: AwsRequestType.patch,
           service: 'service',
           target: 'target',
           region: 'region',
-          timeout: Duration(seconds: 10),
+          timeout: const Duration(seconds: 10),
           headers: {},
           jsonBody: 'jsonBody',
           canonicalUri: 'canonicalUri',
@@ -602,11 +606,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
         return AwsHttpRequest.send(
           awsSecretKey: 'awsSecretKey',
           awsAccessKey: 'awsAccessKey',
-          type: AwsRequestType.HEAD,
+          type: AwsRequestType.head,
           service: 'service',
           target: 'target',
           region: 'region',
-          timeout: Duration(seconds: 10),
+          timeout: const Duration(seconds: 10),
           headers: {},
           jsonBody: 'jsonBody',
           canonicalUri: 'canonicalUri',
@@ -622,11 +626,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""",
         await AwsHttpRequest.send(
           awsSecretKey: 'awsSecretKey',
           awsAccessKey: 'awsAccessKey',
-          type: AwsRequestType.HEAD,
+          type: AwsRequestType.head,
           service: 'service',
           target: 'target',
           region: 'region',
-          timeout: Duration(microseconds: 0),
+          timeout: const Duration(microseconds: 0),
           headers: {},
           jsonBody: 'jsonBody',
           canonicalUri: 'canonicalUri',

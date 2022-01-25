@@ -1,10 +1,10 @@
-import 'package:aws_request/src/util.dart';
+import 'package:aws_request/src/request.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('AwsRequestException', () {
     test('constructor', () {
-      AwsRequestException exception = AwsRequestException(
+      final AwsRequestException exception = AwsRequestException(
         message: '',
         stackTrace: StackTrace.empty,
       );
@@ -12,14 +12,14 @@ void main() {
       expect(exception.stackTrace, StackTrace.empty);
     });
     test('toString - empty', () {
-      AwsRequestException exception = AwsRequestException(
+      final AwsRequestException exception = AwsRequestException(
         message: '',
         stackTrace: StackTrace.empty,
       );
       expect(exception.toString(), 'AwsRequestException - message: ');
     });
     test('toString - filled', () {
-      AwsRequestException exception = AwsRequestException(
+      final AwsRequestException exception = AwsRequestException(
         message: 'test message',
         stackTrace: StackTrace.current,
       );
@@ -30,12 +30,12 @@ void main() {
   group('AwsRequestType', () {
     test('values', () {
       expect(AwsRequestType.values, [
-        AwsRequestType.GET,
-        AwsRequestType.POST,
-        AwsRequestType.DELETE,
-        AwsRequestType.PATCH,
-        AwsRequestType.PUT,
-        AwsRequestType.HEAD
+        AwsRequestType.get,
+        AwsRequestType.post,
+        AwsRequestType.delete,
+        AwsRequestType.patch,
+        AwsRequestType.put,
+        AwsRequestType.head
       ]);
     });
   });
@@ -49,7 +49,7 @@ void main() {
   });
   group('validateRequest', () {
     test('both null', () {
-      Map<String, dynamic> validation = validateRequest(null, null);
+      final Map<String, dynamic> validation = validateRequest(null, null);
       expect(validation, {
         'valid': false,
         'error':
@@ -57,7 +57,7 @@ void main() {
       });
     });
     test('null service', () {
-      Map<String, dynamic> validation = validateRequest(null, 'null');
+      final Map<String, dynamic> validation = validateRequest(null, 'null');
       expect(validation, {
         'valid': false,
         'error':
@@ -65,7 +65,7 @@ void main() {
       });
     });
     test('null target', () {
-      Map<String, dynamic> validation = validateRequest('null', null);
+      final Map<String, dynamic> validation = validateRequest('null', null);
       expect(validation, {
         'valid': false,
         'error':
@@ -73,7 +73,7 @@ void main() {
       });
     });
     test('null target', () {
-      Map<String, dynamic> validation = validateRequest('null', 'null');
+      final Map<String, dynamic> validation = validateRequest('null', 'null');
       expect(validation, {'valid': true, 'error': null});
     });
   });

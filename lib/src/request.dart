@@ -6,7 +6,7 @@ import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:intl/intl.dart';
 
-import 'util.dart';
+part 'util.dart';
 
 class AwsHttpRequest {
   static Map<String, String> getSignedHeaders(
@@ -15,12 +15,12 @@ class AwsHttpRequest {
       String target,
       String host,
       String amzDate) {
-    Map<String, String> signedHeaders = {
+    final Map<String, String> signedHeaders = {
       'host': host,
       'x-amz-date': amzDate,
       'x-amz-target': target,
     };
-    for (String key in signedHeaderNames) {
+    for (final String key in signedHeaderNames) {
       if (!signedHeaders.containsKey(key) && headers.containsKey(key)) {
         signedHeaders[key] = headers[key]!;
       } else {
@@ -56,10 +56,10 @@ class AwsHttpRequest {
     String serviceName,
     String stringToSign,
   ) {
-    List<int> kDate = sign(utf8.encode('AWS4' + key), dateStamp);
-    List<int> kRegion = sign(kDate, regionName);
-    List<int> kService = sign(kRegion, serviceName);
-    List<int> kSigning = sign(kService, 'aws4_request');
+    final List<int> kDate = sign(utf8.encode('AWS4$key'), dateStamp);
+    final List<int> kRegion = sign(kDate, regionName);
+    final List<int> kService = sign(kRegion, serviceName);
+    final List<int> kSigning = sign(kService, 'aws4_request');
     return sign(kSigning, stringToSign, hex: true);
   }
 
@@ -69,17 +69,17 @@ class AwsHttpRequest {
       Map<String, String> signedHeaders,
       String canonicalUri,
       String canonicalQuerystring) {
-    List<String> canonicalHeaders = [];
+    final List<String> canonicalHeaders = [];
     signedHeaders.forEach((key, value) {
       canonicalHeaders.add('$key:$value\n');
     });
     canonicalHeaders.sort();
-    String canonicalHeadersString = canonicalHeaders.join('');
-    List<String> keyList = signedHeaders.keys.toList();
-    keyList.sort();
-    String signedHeaderKeys = keyList.join(';');
-    String payloadHash = sha256.convert(utf8.encode(requestBody)).toString();
-    String canonicalRequest =
+    final String canonicalHeadersString = canonicalHeaders.join('');
+    final List<String> keyList = signedHeaders.keys.toList()..sort();
+    final String signedHeaderKeys = keyList.join(';');
+    final String payloadHash =
+        sha256.convert(utf8.encode(requestBody)).toString();
+    final String canonicalRequest =
         '$type\n$canonicalUri\n$canonicalQuerystring\n$canonicalHeadersString\n'
         '$signedHeaderKeys\n$payloadHash';
     return canonicalRequest;
@@ -94,21 +94,21 @@ class AwsHttpRequest {
     String service,
     Map<String, String> signedHeaders,
   ) {
-    String algorithm = 'AWS4-HMAC-SHA256';
-    String dateStamp = DateFormat('yyyyMMdd').format(DateTime.now().toUtc());
-    String credentialScope = '$dateStamp/$region/$service/aws4_request';
-    String stringToSign = '$algorithm\n$amzDate\n$credentialScope\n'
+    const String algorithm = 'AWS4-HMAC-SHA256';
+    final String dateStamp =
+        DateFormat('yyyyMMdd').format(DateTime.now().toUtc());
+    final String credentialScope = '$dateStamp/$region/$service/aws4_request';
+    final String stringToSign = '$algorithm\n$amzDate\n$credentialScope\n'
         '${sha256.convert(utf8.encode(canonicalRequest)).toString()}';
-    String signature = getSignature(
+    final String signature = getSignature(
       awsSecretKey,
       dateStamp,
       region,
       service,
       stringToSign,
     );
-    List<String> keyList = signedHeaders.keys.toList();
-    keyList.sort();
-    String signedHeaderKeys = keyList.join(';');
+    final List<String> keyList = signedHeaders.keys.toList()..sort();
+    final String signedHeaderKeys = keyList.join(';');
     return '$algorithm Credential=$awsAccessKey/$credentialScope, '
         'SignedHeaders=$signedHeaderKeys, '
         'Signature=$signature';
@@ -141,53 +141,53 @@ class AwsHttpRequest {
     Map<String, String> headers,
     String body,
     Duration timeout, {
-    bool mockRequest: false,
+    bool mockRequest = false,
     Future<Response> Function(Request)? mockFunction,
   }) async {
     if (mockRequest && mockFunction == null) {
-      throw new AwsRequestException(
+      throw AwsRequestException(
         message: 'Mocking function request to mock AwsRequests',
         stackTrace: StackTrace.current,
       );
     }
-    dynamic client = mockRequest ? MockClient(mockFunction!) : Client();
+    final dynamic client = mockRequest ? MockClient(mockFunction!) : Client();
     Future<Response> response;
     switch (type) {
-      case AwsRequestType.GET:
+      case AwsRequestType.get:
         response = client.get(
           url,
           headers: headers,
         );
         break;
-      case AwsRequestType.POST:
+      case AwsRequestType.post:
         response = client.post(
           url,
           headers: headers,
           body: utf8.encode(body),
         );
         break;
-      case AwsRequestType.DELETE:
+      case AwsRequestType.delete:
         response = client.delete(
           url,
           headers: headers,
           body: utf8.encode(body),
         );
         break;
-      case AwsRequestType.PATCH:
+      case AwsRequestType.patch:
         response = client.patch(
           url,
           headers: headers,
           body: utf8.encode(body),
         );
         break;
-      case AwsRequestType.PUT:
+      case AwsRequestType.put:
         response = client.put(
           url,
           headers: headers,
           body: utf8.encode(body),
         );
         break;
-      case AwsRequestType.HEAD:
+      case AwsRequestType.head:
         response = client.head(
           url,
           headers: headers,
@@ -208,24 +208,24 @@ class AwsHttpRequest {
     required String target,
     required String region,
     required Duration timeout,
-    List<String> signedHeaders: const [],
+    List<String> signedHeaders = const [],
     required Map<String, String> headers,
     required String jsonBody,
     required String canonicalUri,
     Map<String, String>? canonicalQuery,
-    bool mockRequest: false,
+    bool mockRequest = false,
     Future<Response> Function(Request)? mockFunction,
   }) async {
-    String host = '$service.$region.amazonaws.com';
-    Uri url = Uri(
+    final String host = '$service.$region.amazonaws.com';
+    final Uri url = Uri(
       scheme: 'https',
       host: host,
       path: canonicalUri,
       queryParameters: canonicalQuery,
     );
-    String amzDate =
+    final String amzDate =
         DateFormat("yyyyMMdd'T'HHmmss'Z'").format(DateTime.now().toUtc());
-    Map<String, String> signedHeadersMap = getSignedHeaders(
+    final Map<String, String> signedHeadersMap = getSignedHeaders(
       headers,
       signedHeaders,
       target,
@@ -234,14 +234,14 @@ class AwsHttpRequest {
     );
 
     // generate canonical request, auth, and headers
-    String canonicalRequest = getCanonicalRequest(
+    final String canonicalRequest = getCanonicalRequest(
       type.toString().split('.').last,
       jsonBody,
       signedHeadersMap,
       canonicalUri,
       url.query,
     );
-    String auth = getAuth(
+    final String auth = getAuth(
       awsSecretKey,
       awsAccessKey,
       amzDate,
@@ -250,7 +250,7 @@ class AwsHttpRequest {
       service,
       signedHeadersMap,
     );
-    Map<String, String> updatedHeaders = getHeaders(
+    final Map<String, String> updatedHeaders = getHeaders(
       host,
       jsonBody,
       headers,
@@ -261,7 +261,7 @@ class AwsHttpRequest {
     );
 
     // generate request and add headers
-    return await getRequest(
+    return getRequest(
       type,
       url,
       updatedHeaders,

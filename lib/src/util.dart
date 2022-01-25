@@ -1,3 +1,5 @@
+part of 'request.dart';
+
 /// Special exception class to identify exceptions from AwsRequest
 class AwsRequestException implements Exception {
   String message;
@@ -10,13 +12,14 @@ class AwsRequestException implements Exception {
   AwsRequestException({required this.message, required this.stackTrace});
 
   /// AwsRequestException toString
+  @override
   String toString() {
-    return "AwsRequestException - message: $message";
+    return 'AwsRequestException - message: $message';
   }
 }
 
 /// Enum of supported HTTP methods
-enum AwsRequestType { GET, POST, DELETE, PATCH, PUT, HEAD }
+enum AwsRequestType { get, post, delete, patch, put, head }
 
 /// Default headers included automatically with every request.
 /// These can be overridden by passing in a Map with the same keys
