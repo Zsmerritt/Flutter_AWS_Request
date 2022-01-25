@@ -68,7 +68,7 @@ main() {
     awsSecretKey: 'awsSecretKey', 
     region: 'region',
   );
-  request.send(type: AwsRequestType.POST);
+  request.send(type: AwsRequestType.post);
 }
 ~~~
 
@@ -139,7 +139,7 @@ void awsRequestFunction(String logString) async {
     awsAccessKey: 'awsAccessKey',
     awsSecretKey: 'awsSecretKey',
     region: 'region',
-    type: AwsRequestType.POST,
+    type: AwsRequestType.post,
     jsonBody: "{'jsonKey': 'jsonValue'}",
     service: 'logs',
     queryString: {'X-Amz-Expires': '10'},
