@@ -14,9 +14,6 @@ class AwsRequest {
   /// The aws service you are sending a request to
   String? service;
 
-  /// The api you are targeting
-  String? target;
-
   /// AWS access key
   String awsAccessKey;
 
@@ -34,7 +31,6 @@ class AwsRequest {
     this.awsSecretKey,
     this.region, {
     this.service,
-    this.target,
     this.timeout = const Duration(seconds: 10),
   });
 
@@ -44,11 +40,9 @@ class AwsRequest {
   ///
   /// service: aws service you are sending request to
   ///
-  /// target: The api you are targeting (ie Logs_XXXXXXXX.PutLogEvents)
-  ///
   /// signedHeaders: a list of headers aws requires in the signature.
   ///
-  ///    Default included signed headers are: [content-type, host, x-amz-date, x-amz-target]
+  ///    Default included signed headers are: [content-type, host, x-amz-date]
   ///
   ///    (You do not need to provide these in headers)
   ///
@@ -64,7 +58,6 @@ class AwsRequest {
     required String awsSecretKey,
     required String region,
     required String service,
-    required String target,
     required AwsRequestType type,
     List<String> signedHeaders = const [],
     Map<String, String> headers = defaultHeaders,
@@ -79,7 +72,6 @@ class AwsRequest {
       region: region,
       type: type,
       service: service,
-      target: target,
       signedHeaders: signedHeaders,
       headers: headers,
       jsonBody: jsonBody,
@@ -95,11 +87,9 @@ class AwsRequest {
   ///
   /// service: aws service you are sending request to
   ///
-  /// target: The api you are targeting (ie Logs_XXXXXXXX.PutLogEvents)
-  ///
   /// signedHeaders: a list of headers aws requires in the signature.
   ///
-  ///    Default included signed headers are: [content-type, host, x-amz-date, x-amz-target]
+  ///    Default included signed headers are: [content-type, host, x-amz-date]
   ///
   ///    (You do not need to provide these in headers)
   ///
@@ -115,7 +105,6 @@ class AwsRequest {
   Future<Response> send(
     AwsRequestType type, {
     String? service,
-    String? target,
     List<String> signedHeaders = const [],
     Map<String, String> headers = defaultHeaders,
     String jsonBody = '',
@@ -126,7 +115,6 @@ class AwsRequest {
     // validate request
     final Map<String, dynamic> validation = validateRequest(
       service ?? this.service,
-      target ?? this.target,
     );
     if (!validation['valid']) {
       throw AwsRequestException(
@@ -139,7 +127,6 @@ class AwsRequest {
       region: region,
       type: type,
       service: service ?? this.service!,
-      target: target ?? this.target!,
       signedHeaders: signedHeaders,
       headers: headers,
       jsonBody: jsonBody,

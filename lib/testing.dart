@@ -14,9 +14,6 @@ class MockAwsRequest {
   /// The aws service you are sending a request to
   String? service;
 
-  /// The api you are targeting
-  String? target;
-
   /// AWS access key
   String awsAccessKey;
 
@@ -38,7 +35,6 @@ class MockAwsRequest {
     this.region, {
     required this.mockFunction,
     this.service,
-    this.target,
     this.timeout = const Duration(seconds: 10),
   });
 
@@ -48,11 +44,9 @@ class MockAwsRequest {
   ///
   /// service: aws service you are sending request to
   ///
-  /// target: The api you are targeting (ie Logs_XXXXXXXX.PutLogEvents)
-  ///
   /// signedHeaders: a list of headers aws requires in the signature.
   ///
-  ///    Default included signed headers are: [content-type, host, x-amz-date, x-amz-target]
+  ///    Default included signed headers are: [content-type, host, x-amz-date]
   ///
   ///    (You do not need to provide these in headers)
   ///
@@ -68,7 +62,6 @@ class MockAwsRequest {
     required String awsSecretKey,
     required String region,
     required String service,
-    required String target,
     required AwsRequestType type,
     required Future<Response> Function(Request) mockFunction,
     List<String> signedHeaders = const [],
@@ -84,7 +77,6 @@ class MockAwsRequest {
       region: region,
       type: type,
       service: service,
-      target: target,
       signedHeaders: signedHeaders,
       headers: headers,
       jsonBody: jsonBody,
@@ -102,11 +94,9 @@ class MockAwsRequest {
   ///
   /// service: aws service you are sending request to
   ///
-  /// target: The api you are targeting (ie Logs_XXXXXXXX.PutLogEvents)
-  ///
   /// signedHeaders: a list of headers aws requires in the signature.
   ///
-  ///    Default included signed headers are: [content-type, host, x-amz-date, x-amz-target]
+  ///    Default included signed headers are: [content-type, host, x-amz-date]
   ///
   ///    (You do not need to provide these in headers)
   ///
@@ -122,7 +112,6 @@ class MockAwsRequest {
   Future<Response> send(
     AwsRequestType type, {
     String? service,
-    String? target,
     List<String> signedHeaders = const [],
     Map<String, String> headers = defaultHeaders,
     String jsonBody = '',
@@ -133,7 +122,6 @@ class MockAwsRequest {
     // validate request
     final Map<String, dynamic> validation = validateRequest(
       service ?? this.service,
-      target ?? this.target,
     );
     if (!validation['valid']) {
       throw AwsRequestException(
@@ -146,7 +134,6 @@ class MockAwsRequest {
       region: region,
       type: type,
       service: service ?? this.service!,
-      target: target ?? this.target!,
       signedHeaders: signedHeaders,
       headers: headers,
       jsonBody: jsonBody,

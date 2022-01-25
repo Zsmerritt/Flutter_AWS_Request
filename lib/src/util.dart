@@ -30,20 +30,12 @@ const Map<String, String> defaultHeaders = {
 
 Map<String, dynamic> validateRequest(
   String? service,
-  String? target,
 ) {
   if (service == null) {
     return {
       'valid': false,
       'error':
           'No Service Provided. Please pass in a service or set it in the constructor.'
-    };
-  }
-  if (target == null) {
-    return {
-      'valid': false,
-      'error':
-          'No Target Provided. Please pass in a service or set it in the constructor.'
     };
   }
   return {'valid': true, 'error': null};

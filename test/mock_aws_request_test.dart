@@ -17,7 +17,6 @@ void main() {
       expect(awsRequest.awsSecretKey, 'awsSecretKey');
       expect(awsRequest.region, 'region');
       expect(awsRequest.service == null, true);
-      expect(awsRequest.target == null, true);
       expect(awsRequest.timeout.inSeconds, 10);
     });
     test('maximum constructor', () {
@@ -26,7 +25,6 @@ void main() {
         'awsSecretKey',
         'region',
         service: 'service',
-        target: 'target',
         timeout: const Duration(seconds: 100),
         mockFunction: (Request request) async {
           return Response('', 200);
@@ -36,7 +34,6 @@ void main() {
       expect(awsRequest.awsSecretKey, 'awsSecretKey');
       expect(awsRequest.region, 'region');
       expect(awsRequest.service, 'service');
-      expect(awsRequest.target, 'target');
       expect(awsRequest.timeout.inSeconds, 100);
     });
   });
@@ -49,7 +46,6 @@ void main() {
             awsSecretKey: 'awsSecretKey',
             region: 'region',
             service: 'service',
-            target: 'target',
             type: AwsRequestType.get,
             mockFunction: (Request request) async {
               return Response('', 200);
@@ -66,7 +62,6 @@ void main() {
             awsSecretKey: 'awsSecretKey',
             region: 'region',
             service: 'service',
-            target: 'target',
             type: AwsRequestType.get,
             signedHeaders: ['a'],
             headers: {'a': 'a'},
@@ -110,7 +105,6 @@ void main() {
             'awsSecretKey',
             'region',
             service: 'service',
-            target: 'target',
             mockFunction: (Request request) async {
               return Response('', 200);
             },
@@ -132,7 +126,6 @@ void main() {
           ).send(
             AwsRequestType.get,
             service: 'service',
-            target: 'target',
           );
         } catch (e) {
           print(e);
@@ -146,14 +139,12 @@ void main() {
             'awsSecretKey',
             'region',
             service: 'service_1',
-            target: 'target_1',
             mockFunction: (Request request) async {
               return Response('', 200);
             },
           ).send(
             AwsRequestType.get,
             service: 'service',
-            target: 'target',
           );
         } catch (e) {
           print(e);
@@ -171,7 +162,6 @@ void main() {
             },
           )
             ..service = 'service'
-            ..target = 'target'
             ..send(AwsRequestType.get);
         } catch (e) {
           print(e);
@@ -190,7 +180,6 @@ void main() {
           ).send(
             AwsRequestType.get,
             service: 'service',
-            target: 'target',
             signedHeaders: ['a'],
             headers: {'a': 'a'},
             jsonBody: '{"test":"true"}',
