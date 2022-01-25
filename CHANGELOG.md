@@ -7,6 +7,7 @@
 
 * Added stricter analysis options
 * Refactored AwsRequest and MockAwsRequest
+* Removed argument `target` because it should just be a header
 
 ## [0.3.0+1] - 2022/01/09
 

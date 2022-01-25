@@ -5,10 +5,9 @@ void main() {
   group('constructors', () {
     test('minimum constructor', () {
       final AwsRequest awsRequest = AwsRequest(
-        'awsAccessKey',
-        'awsSecretKey',
-        'region',
-      );
+          awsAccessKey: 'awsAccessKey',
+          awsSecretKey: 'awsSecretKey',
+          region: 'region');
       expect(awsRequest.awsAccessKey, 'awsAccessKey');
       expect(awsRequest.awsSecretKey, 'awsSecretKey');
       expect(awsRequest.region, 'region');
@@ -17,9 +16,9 @@ void main() {
     });
     test('maximum constructor', () {
       final AwsRequest awsRequest = AwsRequest(
-        'awsAccessKey',
-        'awsSecretKey',
-        'region',
+        awsAccessKey: 'awsAccessKey',
+        awsSecretKey: 'awsSecretKey',
+        region: 'region',
         service: 'service',
         timeout: const Duration(seconds: 100),
       );
@@ -73,10 +72,9 @@ void main() {
       test('fail validation', () async {
         try {
           final AwsRequest awsRequest = AwsRequest(
-            'awsAccessKey',
-            'awsSecretKey',
-            'region',
-          );
+              awsAccessKey: 'awsAccessKey',
+              awsSecretKey: 'awsSecretKey',
+              region: 'region');
           await awsRequest.send(
             AwsRequestType.get,
           );
@@ -89,9 +87,9 @@ void main() {
       test('pass validation - values in constructor', () async {
         try {
           final AwsRequest awsRequest = AwsRequest(
-            'awsAccessKey',
-            'awsSecretKey',
-            'region',
+            awsAccessKey: 'awsAccessKey',
+            awsSecretKey: 'awsSecretKey',
+            region: 'region',
             service: 'service',
           );
           await awsRequest.send(
@@ -106,10 +104,9 @@ void main() {
       test('pass validation - values in function', () async {
         try {
           final AwsRequest awsRequest = AwsRequest(
-            'awsAccessKey',
-            'awsSecretKey',
-            'region',
-          );
+              awsAccessKey: 'awsAccessKey',
+              awsSecretKey: 'awsSecretKey',
+              region: 'region');
           await awsRequest.send(
             AwsRequestType.get,
             service: 'service',
@@ -123,9 +120,9 @@ void main() {
       test('pass validation - values in both', () async {
         try {
           final AwsRequest awsRequest = AwsRequest(
-            'awsAccessKey',
-            'awsSecretKey',
-            'region',
+            awsAccessKey: 'awsAccessKey',
+            awsSecretKey: 'awsSecretKey',
+            region: 'region',
             service: 'service_1',
           );
           await awsRequest.send(
@@ -141,10 +138,10 @@ void main() {
       test('pass validation - values set later', () async {
         try {
           final AwsRequest awsRequest = AwsRequest(
-            'awsAccessKey',
-            'awsSecretKey',
-            'region',
-          )..service = 'service';
+              awsAccessKey: 'awsAccessKey',
+              awsSecretKey: 'awsSecretKey',
+              region: 'region')
+            ..service = 'service';
           await awsRequest.send(
             AwsRequestType.get,
           );
@@ -157,10 +154,9 @@ void main() {
       test('maximum', () async {
         try {
           final AwsRequest awsRequest = AwsRequest(
-            'awsAccessKey',
-            'awsSecretKey',
-            'region',
-          );
+              awsAccessKey: 'awsAccessKey',
+              awsSecretKey: 'awsSecretKey',
+              region: 'region');
           await awsRequest.send(
             AwsRequestType.get,
             service: 'service',

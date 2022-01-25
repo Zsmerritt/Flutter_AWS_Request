@@ -62,8 +62,14 @@ Create a request and send it!
 ~~~dart
 import 'package:aws_request/aws_request.dart';
 
-AwsRequest request = new AwsRequest('awsAccessKey', 'awsSecretKey', 'region');
-request.send(AwsRequestType.POST);
+main() {
+  final AwsRequest request = new AwsRequest(
+    awsAccessKey: 'awsAccessKey',
+    awsSecretKey: 'awsSecretKey', 
+    region: 'region',
+  );
+  request.send(type: AwsRequestType.POST);
+}
 ~~~
 
 The following parameters can be provided to the `send()` function:
@@ -71,9 +77,8 @@ The following parameters can be provided to the `send()` function:
 ~~~
 type: request type (GET, POST, PUT, etc)
 service: aws service you are sending request to
-target: your instance of that service plus the operation (Logs_XXXXXXXX.PutLogEvents)
 signedHeaders: a list of headers aws requires in the signature.
-   Default included signed headers are: (content-type, host, x-amz-date, x-amz-target)
+   Default included signed headers are: (content-type, host, x-amz-date)
    (You do not need to provide these in [headers])
 headers: any required headers. Any non-default headers included in the signedHeaders 
          must be added here.
@@ -87,6 +92,7 @@ Supported HTTP methods are GET, POST, DELETE, PATCH, PUT, HEAD.
 ## Important Notes:
 
 ### Android
+
 If running on android, make sure you have
 
 `<uses-permission android:name="android.permission.INTERNET" />`
@@ -103,16 +109,20 @@ Here's an example of using aws_request to send a CloudWatch PutLogEvent request:
 import 'package:aws_request/aws_request.dart';
 import 'package:http/http.dart';
 
-void awsRequestFunction(String logString) async {
-  AwsRequest request = new AwsRequest('awsAccessKey', 'awsSecretKey', 'region');
-  Response result = await request.send(
-    AwsRequestType.POST,
+Future<void> awsRequestFunction(String logString) async {
+  final AwsRequest request = new AwsRequest(
+    awsAccessKey: 'awsAccessKey',
+    awsSecretKey: 'awsSecretKey',
+    region: 'region',
+  );
+  final Response result = await request.send(
+    type: AwsRequestType.post,
     jsonBody: "{'jsonKey': 'jsonValue'}",
-    target: 'Logs_20140328.PutLogEvents',
-    service: 'logs',
+    service: 'lambda',
     queryString: {'X-Amz-Expires': '10'},
     headers: {'X-Amz-Security-Token': 'XXXXXXXXXXXX'},
   );
+  print(result.statusCode);
 }
 ~~~
 
@@ -125,14 +135,12 @@ import 'package:aws_request/aws_request.dart';
 import 'package:http/http.dart';
 
 void awsRequestFunction(String logString) async {
-  
   Response result = await AwsRequest.staticSend(
     awsAccessKey: 'awsAccessKey',
     awsSecretKey: 'awsSecretKey',
     region: 'region',
     type: AwsRequestType.POST,
     jsonBody: "{'jsonKey': 'jsonValue'}",
-    target: 'Logs_20140328.PutLogEvents',
     service: 'logs',
     queryString: {'X-Amz-Expires': '10'},
     headers: {'X-Amz-Security-Token': 'XXXXXXXXXXXX'},

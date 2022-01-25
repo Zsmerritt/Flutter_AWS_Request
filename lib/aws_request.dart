@@ -26,10 +26,10 @@ class AwsRequest {
   /// The timeout on the request
   Duration timeout;
 
-  AwsRequest(
-    this.awsAccessKey,
-    this.awsSecretKey,
-    this.region, {
+  AwsRequest({
+    required this.awsAccessKey,
+    required this.awsSecretKey,
+    required this.region,
     this.service,
     this.timeout = const Duration(seconds: 10),
   });
