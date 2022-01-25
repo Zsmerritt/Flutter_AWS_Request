@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:aws_request/aws_request.dart';
 import 'package:aws_request/src/request.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart';
@@ -507,7 +506,7 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
 
   group('send', () {
     Future<Response> mockFunction(Request request) async {
-      await Future.delayed(Duration(milliseconds: 1));
+      await Future.delayed(const Duration(milliseconds: 1));
       return Response(request.method, 500);
     }
 
