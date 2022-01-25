@@ -128,7 +128,7 @@ void main() {
   group('getCanonicalRequest', () {
     test('getCanonicalRequest - 1', () {
       final String requestString = AwsHttpRequest.getCanonicalRequest(
-        type: 'type',
+        type: AwsRequestType.post.toString().toUpperCase().split('.').last,
         requestBody: 'requestBody',
         signedHeaders: {'signedHeaderKey': 'signedHeaderValue'},
         canonicalUri: 'canonical/Uri',
@@ -136,7 +136,7 @@ void main() {
       );
       expect(
         '''
-type
+POST
 canonical/Uri
 canonicalQuerystring=canonicalQuerystring
 signedHeaderKey:signedHeaderValue
@@ -148,7 +148,7 @@ fcf523fac03a2e3a814b7f97bf8c9533d657677c72ff3870afd69cef3b559c60''',
     });
     test('getCanonicalRequest - 2', () {
       final String requestString = AwsHttpRequest.getCanonicalRequest(
-        type: 'type',
+        type: AwsRequestType.delete.toString().toUpperCase().split('.').last,
         requestBody: '',
         signedHeaders: {
           'signedHeaderKey': 'signedHeaderValue',
@@ -160,7 +160,7 @@ fcf523fac03a2e3a814b7f97bf8c9533d657677c72ff3870afd69cef3b559c60''',
       );
       expect(
         '''
-type
+DELETE
 canonical/Uri
 /
 signedHeaderKey1:signedHeaderValue1

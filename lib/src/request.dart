@@ -229,7 +229,7 @@ class AwsHttpRequest {
 
     // generate canonical request, auth, and headers
     final String canonicalRequest = getCanonicalRequest(
-      type: type.toString().split('.').last,
+      type: type.toString().toUpperCase().split('.').last,
       requestBody: jsonBody,
       signedHeaders: signedHeadersMap,
       canonicalUri: canonicalUri,
