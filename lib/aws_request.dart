@@ -102,8 +102,8 @@ class AwsRequest {
   /// queryString: the url query string as a Map
   ///
   /// timeout: overrides constructor request timeout
-  Future<Response> send(
-    AwsRequestType type, {
+  Future<Response> send({
+    required AwsRequestType type,
     String? service,
     List<String> signedHeaders = const [],
     Map<String, String> headers = defaultHeaders,

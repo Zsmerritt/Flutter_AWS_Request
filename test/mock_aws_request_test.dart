@@ -89,9 +89,7 @@ void main() {
               return Response('', 200);
             },
           );
-          await awsRequest.send(
-            AwsRequestType.get,
-          );
+          await awsRequest.send(type: AwsRequestType.get);
         } catch (e) {
           expect(e, isA<AwsRequestException>());
           return;
@@ -108,7 +106,7 @@ void main() {
             mockFunction: (Request request) async {
               return Response('', 200);
             },
-          ).send(AwsRequestType.get);
+          ).send(type: AwsRequestType.get);
         } catch (e) {
           print(e);
           fail('Validation not correct');
@@ -124,7 +122,7 @@ void main() {
               return Response('', 200);
             },
           ).send(
-            AwsRequestType.get,
+            type: AwsRequestType.get,
             service: 'service',
           );
         } catch (e) {
@@ -143,7 +141,7 @@ void main() {
               return Response('', 200);
             },
           ).send(
-            AwsRequestType.get,
+            type: AwsRequestType.get,
             service: 'service',
           );
         } catch (e) {
@@ -162,7 +160,7 @@ void main() {
             },
           )
             ..service = 'service'
-            ..send(AwsRequestType.get);
+            ..send(type: AwsRequestType.get);
         } catch (e) {
           print(e);
           fail('Validation not correct');
@@ -178,7 +176,7 @@ void main() {
               return Response('', 200);
             },
           ).send(
-            AwsRequestType.get,
+            type: AwsRequestType.get,
             service: 'service',
             signedHeaders: ['a'],
             headers: {'a': 'a'},

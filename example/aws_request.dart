@@ -2,8 +2,11 @@ import 'package:aws_request/aws_request.dart';
 import 'package:http/http.dart';
 
 Future<void> awsRequestFunction(String logString) async {
-  final AwsRequest request =
-      AwsRequest('awsAccessKey', 'awsSecretKey', 'region');
+  final AwsRequest request = new AwsRequest(
+    awsAccessKey: 'awsAccessKey',
+    awsSecretKey: 'awsSecretKey',
+    region: 'region',
+  );
   final Response result = await request.send(
     type: AwsRequestType.post,
     jsonBody: "{'jsonKey': 'jsonValue'}",

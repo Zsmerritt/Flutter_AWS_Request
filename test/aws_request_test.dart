@@ -76,7 +76,7 @@ void main() {
               awsSecretKey: 'awsSecretKey',
               region: 'region');
           await awsRequest.send(
-            AwsRequestType.get,
+            type: AwsRequestType.get,
           );
         } catch (e) {
           expect(e, isA<AwsRequestException>());
@@ -93,7 +93,7 @@ void main() {
             service: 'service',
           );
           await awsRequest.send(
-            AwsRequestType.get,
+            type: AwsRequestType.get,
           );
         } catch (e) {
           expect(e.toString().contains('Failed host lookup'), true);
@@ -108,7 +108,7 @@ void main() {
               awsSecretKey: 'awsSecretKey',
               region: 'region');
           await awsRequest.send(
-            AwsRequestType.get,
+            type: AwsRequestType.get,
             service: 'service',
           );
         } catch (e) {
@@ -126,7 +126,7 @@ void main() {
             service: 'service_1',
           );
           await awsRequest.send(
-            AwsRequestType.get,
+            type: AwsRequestType.get,
             service: 'service',
           );
         } catch (e) {
@@ -143,7 +143,7 @@ void main() {
               region: 'region')
             ..service = 'service';
           await awsRequest.send(
-            AwsRequestType.get,
+            type: AwsRequestType.get,
           );
         } catch (e) {
           expect(e.toString().contains('Failed host lookup'), true);
@@ -158,7 +158,7 @@ void main() {
               awsSecretKey: 'awsSecretKey',
               region: 'region');
           await awsRequest.send(
-            AwsRequestType.get,
+            type: AwsRequestType.get,
             service: 'service',
             signedHeaders: ['a'],
             headers: {'a': 'a'},
