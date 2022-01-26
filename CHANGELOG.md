@@ -1,6 +1,11 @@
+## [0.4.0+1] - 2022/01/25
+
+* Added comments for better auto documentation
+
 ## [0.4.0] - 2022/01/24
 
-### Breaking Changes: 
+### Breaking Changes:
+
 * AwsRequestTypes have been lower cased to conform with dart conventions
 
 ### Changes:
