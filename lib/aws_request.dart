@@ -10,6 +10,7 @@ import 'package:http/http.dart';
 export 'package:aws_request/src/request.dart'
     show AwsRequestType, AwsRequestException;
 
+/// A class to easily send API requests to AWS services
 class AwsRequest {
   /// The aws service you are sending a request to
   String? service;

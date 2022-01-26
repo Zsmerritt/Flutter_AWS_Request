@@ -10,6 +10,7 @@ import 'package:http/http.dart';
 export 'package:aws_request/src/request.dart'
     show AwsRequestType, AwsRequestException;
 
+/// A mock version of AwsRequest to help with testing
 class MockAwsRequest {
   /// The aws service you are sending a request to
   String? service;
