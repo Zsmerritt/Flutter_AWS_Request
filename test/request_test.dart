@@ -420,10 +420,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
         body: '',
         timeout: const Duration(seconds: 10),
         mockRequest: true,
-      ).then((val) {
+      ).then<Future<Response>>((val) {
         fail('Mock client not detected!');
       }, onError: (e) {
         expect(e, isA<AwsRequestException>());
+        return Future(() => Response('body', 400));
       });
     });
 

@@ -3,6 +3,7 @@
 * Minor housekeeping to fix running tests & lint deprecations
 * Fixed typo in description
 * Updated example
+* Fixed test case for modern dart
 
 ## [0.4.0+1] - 2022/01/25
 
