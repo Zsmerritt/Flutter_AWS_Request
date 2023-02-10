@@ -422,7 +422,6 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
         mockRequest: true,
       ).then((val) {
         fail('Mock client not detected!');
-        return; // needed for compiler
       }, onError: (e) {
         expect(e, isA<AwsRequestException>());
       });

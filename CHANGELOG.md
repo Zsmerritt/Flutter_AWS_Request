@@ -1,3 +1,9 @@
+## [0.4.0+2] - 2023/02/09
+
+* Minor housekeeping to fix running tests & lint deprecations
+* Fixed typo in description
+* Updated example
+
 ## [0.4.0+1] - 2022/01/25
 
 * Added comments for better auto documentation

@@ -2,7 +2,7 @@ import 'package:aws_request/aws_request.dart';
 import 'package:http/http.dart';
 
 Future<void> awsRequestFunction(String logString) async {
-  final AwsRequest request = new AwsRequest(
+  final AwsRequest request = AwsRequest(
     awsAccessKey: 'awsAccessKey',
     awsSecretKey: 'awsSecretKey',
     region: 'region',
