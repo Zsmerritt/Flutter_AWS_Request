@@ -1,3 +1,8 @@
+## [1.0.0] - 2023/05/31
+
+* Requires Dart 3.0 or later
+* Updated to http ^1.0.0
+
 ## [0.5.0] - 2023/05/31
 
 * Updated `intl` to new version
