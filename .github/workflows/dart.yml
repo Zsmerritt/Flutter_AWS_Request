@@ -14,6 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
 
       # Note: This workflow uses the latest stable version of the Dart SDK.
       # You can specify other versions if desired, see documentation here:
@@ -36,10 +38,6 @@ jobs:
       # want to change this to 'flutter test'.
       - name: Run tests
         run: flutter test
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
 
       - name: Collect coverage
         run: flutter test --coverage .
