@@ -446,8 +446,17 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
     });
 
     test('check MockClient', () {
+      final Request request = Request(
+        'GET',
+        Uri.parse('https://www.google.com'),
+      );
+
       Future<Response> mockFunction(Request request) async {
-        return Response('', 500);
+        return Response(
+          '',
+          500,
+          request: request,
+        );
       }
 
       return AwsHttpRequest.getRequest(
@@ -459,10 +468,6 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
         mockFunction: mockFunction,
         mockRequest: true,
       ).then((val) {
-        final Request request = Request(
-          'GET',
-          Uri.parse('https://www.google.com'),
-        );
         expect(
           val.request!.url,
           request.url,

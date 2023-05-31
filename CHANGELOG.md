@@ -1,3 +1,8 @@
+## [0.5.0] - 2023/05/31
+
+* Updated `intl` to new version
+* Fixed test broken by update
+
 ## [0.4.0+2] - 2023/02/09
 
 * Minor housekeeping to fix running tests & lint deprecations
