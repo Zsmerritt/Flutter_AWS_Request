@@ -8,7 +8,7 @@ environment:
 
 dependencies:
 
-  intl: ^0.19.0 # Date Formatting
+  intl: ^0.20.0 # Date Formatting
   crypto: ^3.0.0 # Key Signing
   http: ^1.0.0 # Send requests
 
