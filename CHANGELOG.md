@@ -1,6 +1,11 @@
+## [1.1.0] - 2025/06/21
+
+* Increased minimum `intl` version for 3.32 compatiblity
+* Removed outdated lint rule
+
 ## [1.0.1] - 2024/05/20
 
-* increased minimum `intl` version for 3.3 compatiblity
+* Increased minimum `intl` version for 3.3 compatiblity
 
 ## [1.0.0] - 2023/05/31
 
