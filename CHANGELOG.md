@@ -1,11 +1,34 @@
+## [2.0.0] - 2026/03/21
+
+### Breaking Changes:
+
+* `MockAwsRequest` constructor now uses named parameters to match `AwsRequest` API
+* `AwsRequestException` fields (`message`, `stackTrace`) are now `final`
+
+### Changes:
+
+* Removed `intl` dependency — date formatting is now handled internally
+* Fixed HTTP client resource leak in `getRequest` (client now always closed via `try/finally`)
+* Fixed SigV4 timestamp race condition — `getAuth` now derives dateStamp from amzDate instead of a separate `DateTime.now()` call
+* Added optional `endpoint` parameter for custom/non-standard AWS hostnames (S3 virtual-hosted-style, VPC endpoints, LocalStack, etc.)
+* `sign()` return type changed from `dynamic` to `Digest`
+* `validateRequest` now throws directly instead of returning a validation map
+* Removed unused parameters (`host`, `requestBody`, `timeout`) from `getHeaders`
+* `getSignedHeaders` no longer throws when default keys (e.g. `host`) are passed in `signedHeaders`
+* Replaced `type.toString().toUpperCase().split('.').last` with `type.name.toUpperCase()`
+* All tests now use mock HTTP clients instead of external network calls
+* Updated CI pipeline actions (`checkout@v4`, `codecov-action@v5`)
+* Updated README with SDK requirements, `MockAwsRequest` documentation, custom endpoints, and corrected examples
+* Updated example project to current SDK and package versions
+
 ## [1.1.0] - 2025/06/21
 
-* Increased minimum `intl` version for 3.32 compatiblity
+* Increased minimum `intl` version for 3.32 compatibility
 * Removed outdated lint rule
 
 ## [1.0.1] - 2024/05/20
 
-* Increased minimum `intl` version for 3.3 compatiblity
+* Increased minimum `intl` version for 3.3 compatibility
 
 ## [1.0.0] - 2023/05/31
 

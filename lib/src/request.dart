@@ -4,11 +4,29 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
-import 'package:intl/intl.dart';
 
 part 'util.dart';
 
 class AwsHttpRequest {
+  static String _formatAmzDate(DateTime dt) {
+    final DateTime utc = dt.toUtc();
+    return '${utc.year.toString().padLeft(4, '0')}'
+        '${utc.month.toString().padLeft(2, '0')}'
+        '${utc.day.toString().padLeft(2, '0')}'
+        'T'
+        '${utc.hour.toString().padLeft(2, '0')}'
+        '${utc.minute.toString().padLeft(2, '0')}'
+        '${utc.second.toString().padLeft(2, '0')}'
+        'Z';
+  }
+
+  static String _formatDateStamp(DateTime dt) {
+    final DateTime utc = dt.toUtc();
+    return '${utc.year.toString().padLeft(4, '0')}'
+        '${utc.month.toString().padLeft(2, '0')}'
+        '${utc.day.toString().padLeft(2, '0')}';
+  }
+
   static Map<String, String> getSignedHeaders({
     required Map<String, String> headers,
     required List<String> signedHeaderNames,
@@ -20,7 +38,10 @@ class AwsHttpRequest {
       'x-amz-date': amzDate,
     };
     for (final String key in signedHeaderNames) {
-      if (!signedHeaders.containsKey(key) && headers.containsKey(key)) {
+      if (signedHeaders.containsKey(key)) {
+        continue;
+      }
+      if (headers.containsKey(key)) {
         signedHeaders[key] = headers[key]!;
       } else {
         throw AwsRequestException(
@@ -40,7 +61,7 @@ class AwsHttpRequest {
     return signedHeaders;
   }
 
-  static dynamic sign({required List<int> key, required String msg}) {
+  static Digest sign({required List<int> key, required String msg}) {
     return Hmac(sha256, key).convert(utf8.encode(msg));
   }
 
@@ -93,8 +114,7 @@ class AwsHttpRequest {
     required Map<String, String> signedHeaders,
   }) {
     const String algorithm = 'AWS4-HMAC-SHA256';
-    final String dateStamp =
-        DateFormat('yyyyMMdd').format(DateTime.now().toUtc());
+    final String dateStamp = amzDate.substring(0, 8);
     final String credentialScope = '$dateStamp/$region/$service/aws4_request';
     final String stringToSign = '$algorithm\n$amzDate\n$credentialScope\n'
         '${sha256.convert(utf8.encode(canonicalRequest)).toString()}';
@@ -113,18 +133,14 @@ class AwsHttpRequest {
   }
 
   static Map<String, String> getHeaders({
-    required String host,
-    required String requestBody,
     required Map<String, String> headers,
     required String amzDate,
     required String auth,
-    required Duration timeout,
   }) {
     return {
       ...defaultHeaders,
       ...headers,
       ...{
-        // We never want these keys overwritten
         'Authorization': auth,
         'x-amz-date': amzDate,
       }
@@ -146,54 +162,57 @@ class AwsHttpRequest {
         stackTrace: StackTrace.current,
       );
     }
-    final dynamic client = mockRequest ? MockClient(mockFunction!) : Client();
-    Future<Response> response;
-    switch (type) {
-      case AwsRequestType.get:
-        response = client.get(
-          url,
-          headers: headers,
-        );
-        break;
-      case AwsRequestType.post:
-        response = client.post(
-          url,
-          headers: headers,
-          body: utf8.encode(body),
-        );
-        break;
-      case AwsRequestType.delete:
-        response = client.delete(
-          url,
-          headers: headers,
-          body: utf8.encode(body),
-        );
-        break;
-      case AwsRequestType.patch:
-        response = client.patch(
-          url,
-          headers: headers,
-          body: utf8.encode(body),
-        );
-        break;
-      case AwsRequestType.put:
-        response = client.put(
-          url,
-          headers: headers,
-          body: utf8.encode(body),
-        );
-        break;
-      case AwsRequestType.head:
-        response = client.head(
-          url,
-          headers: headers,
-        );
-        break;
-    }
-    return response.timeout(timeout, onTimeout: () {
+    final Client client = mockRequest ? MockClient(mockFunction!) : Client();
+    try {
+      final Future<Response> future;
+      switch (type) {
+        case AwsRequestType.get:
+          future = client.get(
+            url,
+            headers: headers,
+          );
+          break;
+        case AwsRequestType.post:
+          future = client.post(
+            url,
+            headers: headers,
+            body: utf8.encode(body),
+          );
+          break;
+        case AwsRequestType.delete:
+          future = client.delete(
+            url,
+            headers: headers,
+            body: utf8.encode(body),
+          );
+          break;
+        case AwsRequestType.patch:
+          future = client.patch(
+            url,
+            headers: headers,
+            body: utf8.encode(body),
+          );
+          break;
+        case AwsRequestType.put:
+          future = client.put(
+            url,
+            headers: headers,
+            body: utf8.encode(body),
+          );
+          break;
+        case AwsRequestType.head:
+          future = client.head(
+            url,
+            headers: headers,
+          );
+          break;
+      }
+      return await future.timeout(timeout, onTimeout: () {
+        throw TimeoutException('AwsRequest Timed Out', timeout);
+      });
+    } finally {
       client.close();
-      throw TimeoutException('AwsRequest Timed Out', timeout);
-    });
+    }
   }
 
   static Future<Response> send({
@@ -208,18 +227,18 @@ class AwsHttpRequest {
     required String jsonBody,
     required String canonicalUri,
     Map<String, String>? canonicalQuery,
+    String? endpoint,
     bool mockRequest = false,
     Future<Response> Function(Request)? mockFunction,
   }) async {
-    final String host = '$service.$region.amazonaws.com';
+    final String host = endpoint ?? '$service.$region.amazonaws.com';
     final Uri url = Uri(
       scheme: 'https',
       host: host,
       path: canonicalUri,
       queryParameters: canonicalQuery,
     );
-    final String amzDate =
-        DateFormat("yyyyMMdd'T'HHmmss'Z'").format(DateTime.now().toUtc());
+    final String amzDate = _formatAmzDate(DateTime.now());
     final Map<String, String> signedHeadersMap = getSignedHeaders(
       headers: headers,
       signedHeaderNames: signedHeaders,
@@ -227,9 +246,8 @@ class AwsHttpRequest {
       amzDate: amzDate,
     );
 
-    // generate canonical request, auth, and headers
     final String canonicalRequest = getCanonicalRequest(
-      type: type.toString().toUpperCase().split('.').last,
+      type: type.name.toUpperCase(),
       requestBody: jsonBody,
       signedHeaders: signedHeadersMap,
       canonicalUri: canonicalUri,
@@ -245,15 +263,11 @@ class AwsHttpRequest {
       signedHeaders: signedHeadersMap,
     );
     final Map<String, String> updatedHeaders = getHeaders(
-      host: host,
-      requestBody: jsonBody,
       headers: headers,
       amzDate: amzDate,
       auth: auth,
-      timeout: timeout,
     );
 
-    // generate request and add headers
     return getRequest(
       type: type,
       url: url,

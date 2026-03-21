@@ -27,12 +27,17 @@ class AwsRequest {
   /// The timeout on the request
   Duration timeout;
 
+  /// Optional custom endpoint hostname (e.g., 'mybucket.s3.us-east-1.amazonaws.com').
+  /// When null, the standard '{service}.{region}.amazonaws.com' pattern is used.
+  String? endpoint;
+
   AwsRequest({
     required this.awsAccessKey,
     required this.awsSecretKey,
     required this.region,
     this.service,
     this.timeout = const Duration(seconds: 10),
+    this.endpoint,
   });
 
   /// Statically Builds, signs, and sends aws http requests.
@@ -53,7 +58,10 @@ class AwsRequest {
   ///
   /// queryPath: the aws query path
   ///
-  /// queryString:the url query string as a Map
+  /// queryString: the url query string as a Map
+  ///
+  /// endpoint: custom hostname override (e.g., 'mybucket.s3.us-east-1.amazonaws.com').
+  /// Defaults to '{service}.{region}.amazonaws.com' when null.
   static Future<Response> staticSend({
     required String awsAccessKey,
     required String awsSecretKey,
@@ -66,6 +74,7 @@ class AwsRequest {
     String queryPath = '/',
     Map<String, String>? queryString,
     Duration timeout = const Duration(seconds: 10),
+    String? endpoint,
   }) async {
     return AwsHttpRequest.send(
       awsAccessKey: awsAccessKey,
@@ -79,6 +88,7 @@ class AwsRequest {
       canonicalUri: queryPath,
       canonicalQuery: queryString,
       timeout: timeout,
+      endpoint: endpoint,
     );
   }
 
@@ -103,6 +113,9 @@ class AwsRequest {
   /// queryString: the url query string as a Map
   ///
   /// timeout: overrides constructor request timeout
+  ///
+  /// endpoint: custom hostname override. Defaults to constructor value,
+  /// then '{service}.{region}.amazonaws.com' when null.
   Future<Response> send({
     required AwsRequestType type,
     String? service,
@@ -112,16 +125,9 @@ class AwsRequest {
     String queryPath = '/',
     Map<String, String>? queryString,
     Duration? timeout,
+    String? endpoint,
   }) async {
-    // validate request
-    final Map<String, dynamic> validation = validateRequest(
-      service ?? this.service,
-    );
-    if (!validation['valid']) {
-      throw AwsRequestException(
-          message: 'AwsRequestException: ${validation['error']}',
-          stackTrace: StackTrace.current);
-    }
+    validateRequest(service ?? this.service);
     return AwsHttpRequest.send(
       awsAccessKey: awsAccessKey,
       awsSecretKey: awsSecretKey,
@@ -134,6 +140,7 @@ class AwsRequest {
       canonicalUri: queryPath,
       canonicalQuery: queryString,
       timeout: timeout ?? this.timeout,
+      endpoint: endpoint ?? this.endpoint,
     );
   }
 }

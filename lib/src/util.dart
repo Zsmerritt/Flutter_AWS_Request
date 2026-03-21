@@ -2,8 +2,8 @@ part of 'request.dart';
 
 /// Special exception class to identify exceptions from AwsRequest
 class AwsRequestException implements Exception {
-  String message;
-  StackTrace stackTrace;
+  final String message;
+  final StackTrace stackTrace;
 
   /// A custom error to identify AwsRequest errors more easily
   ///
@@ -28,15 +28,12 @@ const Map<String, String> defaultHeaders = {
   'Content-Type': 'application/x-amz-json-1.1',
 };
 
-Map<String, dynamic> validateRequest(
-  String? service,
-) {
+void validateRequest(String? service) {
   if (service == null) {
-    return {
-      'valid': false,
-      'error':
-          'No Service Provided. Please pass in a service or set it in the constructor.'
-    };
+    throw AwsRequestException(
+      message:
+          'AwsRequestException: No Service Provided. Please pass in a service or set it in the constructor.',
+      stackTrace: StackTrace.current,
+    );
   }
-  return {'valid': true, 'error': null};
 }

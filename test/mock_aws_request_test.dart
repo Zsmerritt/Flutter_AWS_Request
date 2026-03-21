@@ -6,9 +6,9 @@ void main() {
   group('constructors', () {
     test('minimum constructor', () {
       final MockAwsRequest awsRequest = MockAwsRequest(
-        'awsAccessKey',
-        'awsSecretKey',
-        'region',
+        awsAccessKey: 'awsAccessKey',
+        awsSecretKey: 'awsSecretKey',
+        region: 'region',
         mockFunction: (Request request) async {
           return Response('', 200);
         },
@@ -21,9 +21,9 @@ void main() {
     });
     test('maximum constructor', () {
       final MockAwsRequest awsRequest = MockAwsRequest(
-        'awsAccessKey',
-        'awsSecretKey',
-        'region',
+        awsAccessKey: 'awsAccessKey',
+        awsSecretKey: 'awsSecretKey',
+        region: 'region',
         service: 'service',
         timeout: const Duration(seconds: 100),
         mockFunction: (Request request) async {
@@ -82,9 +82,9 @@ void main() {
       test('fail validation', () async {
         try {
           final MockAwsRequest awsRequest = MockAwsRequest(
-            'awsAccessKey',
-            'awsSecretKey',
-            'region',
+            awsAccessKey: 'awsAccessKey',
+            awsSecretKey: 'awsSecretKey',
+            region: 'region',
             mockFunction: (Request request) async {
               return Response('', 200);
             },
@@ -99,9 +99,9 @@ void main() {
       test('pass validation - values in constructor', () {
         try {
           MockAwsRequest(
-            'awsAccessKey',
-            'awsSecretKey',
-            'region',
+            awsAccessKey: 'awsAccessKey',
+            awsSecretKey: 'awsSecretKey',
+            region: 'region',
             service: 'service',
             mockFunction: (Request request) async {
               return Response('', 200);
@@ -112,12 +112,12 @@ void main() {
           fail('Validation not correct');
         }
       });
-      test('pass validation - values in functi`on', () {
+      test('pass validation - values in function', () {
         try {
           MockAwsRequest(
-            'awsAccessKey',
-            'awsSecretKey',
-            'region',
+            awsAccessKey: 'awsAccessKey',
+            awsSecretKey: 'awsSecretKey',
+            region: 'region',
             mockFunction: (Request request) async {
               return Response('', 200);
             },
@@ -133,9 +133,9 @@ void main() {
       test('pass validation - values in both', () {
         try {
           MockAwsRequest(
-            'awsAccessKey',
-            'awsSecretKey',
-            'region',
+            awsAccessKey: 'awsAccessKey',
+            awsSecretKey: 'awsSecretKey',
+            region: 'region',
             service: 'service_1',
             mockFunction: (Request request) async {
               return Response('', 200);
@@ -152,9 +152,9 @@ void main() {
       test('pass validation - values set later', () {
         try {
           MockAwsRequest(
-            'awsAccessKey',
-            'awsSecretKey',
-            'region',
+            awsAccessKey: 'awsAccessKey',
+            awsSecretKey: 'awsSecretKey',
+            region: 'region',
             mockFunction: (Request request) async {
               return Response('', 200);
             },
@@ -169,9 +169,9 @@ void main() {
       test('maximum', () {
         try {
           MockAwsRequest(
-            'awsAccessKey',
-            'awsSecretKey',
-            'region',
+            awsAccessKey: 'awsAccessKey',
+            awsSecretKey: 'awsSecretKey',
+            region: 'region',
             mockFunction: (Request request) async {
               return Response('', 200);
             },

@@ -49,16 +49,13 @@ void main() {
   });
   group('validateRequest', () {
     test('null', () {
-      final Map<String, dynamic> validation = validateRequest(null);
-      expect(validation, {
-        'valid': false,
-        'error':
-            'No Service Provided. Please pass in a service or set it in the constructor.'
-      });
+      expect(
+        () => validateRequest(null),
+        throwsA(isA<AwsRequestException>()),
+      );
     });
     test('Not null', () {
-      final Map<String, dynamic> validation = validateRequest('null');
-      expect(validation, {'valid': true, 'error': null});
+      expect(() => validateRequest('service'), returnsNormally);
     });
   });
 }

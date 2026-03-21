@@ -27,16 +27,20 @@ class MockAwsRequest {
   /// The timeout on the request
   Duration timeout;
 
+  /// Optional custom endpoint hostname
+  String? endpoint;
+
   /// The function used to specify responses
   Future<Response> Function(Request) mockFunction;
 
-  MockAwsRequest(
-    this.awsAccessKey,
-    this.awsSecretKey,
-    this.region, {
+  MockAwsRequest({
+    required this.awsAccessKey,
+    required this.awsSecretKey,
+    required this.region,
     required this.mockFunction,
     this.service,
     this.timeout = const Duration(seconds: 10),
+    this.endpoint,
   });
 
   /// Statically Builds, signs, and mocks an aws http request.
@@ -57,7 +61,7 @@ class MockAwsRequest {
   ///
   /// queryPath: the aws query path
   ///
-  /// queryString: the aws query string, formatted like ['abc=123&def=456']. Must be url encoded
+  /// queryString: the url query string as a Map
   static Future<Response> staticSend({
     required String awsAccessKey,
     required String awsSecretKey,
@@ -71,6 +75,7 @@ class MockAwsRequest {
     String queryPath = '/',
     Map<String, String>? queryString,
     Duration timeout = const Duration(seconds: 10),
+    String? endpoint,
   }) async {
     return AwsHttpRequest.send(
       awsAccessKey: awsAccessKey,
@@ -84,6 +89,7 @@ class MockAwsRequest {
       canonicalUri: queryPath,
       canonicalQuery: queryString,
       timeout: timeout,
+      endpoint: endpoint,
       mockRequest: true,
       mockFunction: mockFunction,
     );
@@ -119,16 +125,9 @@ class MockAwsRequest {
     String queryPath = '/',
     Map<String, String>? queryString,
     Duration? timeout,
+    String? endpoint,
   }) async {
-    // validate request
-    final Map<String, dynamic> validation = validateRequest(
-      service ?? this.service,
-    );
-    if (!validation['valid']) {
-      throw AwsRequestException(
-          message: 'AwsRequestException: ${validation['error']}',
-          stackTrace: StackTrace.current);
-    }
+    validateRequest(service ?? this.service);
     return AwsHttpRequest.send(
       awsAccessKey: awsAccessKey,
       awsSecretKey: awsSecretKey,
@@ -141,6 +140,7 @@ class MockAwsRequest {
       canonicalUri: queryPath,
       canonicalQuery: queryString,
       timeout: timeout ?? this.timeout,
+      endpoint: endpoint ?? this.endpoint,
       mockRequest: true,
       mockFunction: mockFunction,
     );

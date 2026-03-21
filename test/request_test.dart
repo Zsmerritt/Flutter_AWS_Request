@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:aws_request/src/request.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart';
-import 'package:intl/intl.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -62,6 +61,22 @@ void main() {
           'content-type': 'content-type'
         },
         signedHeaderNames: ['signed_header'],
+        host: 'host',
+        amzDate: 'amzDate',
+      );
+      expect(generatedSignedHeaders, correctSignedHeaders);
+    });
+
+    test('getSignedHeaders skips already-included keys', () {
+      const Map<String, String> correctSignedHeaders = {
+        'host': 'host',
+        'x-amz-date': 'amzDate',
+        'content-type': 'application/x-amz-json-1.1'
+      };
+      final Map<String, String> generatedSignedHeaders =
+          AwsHttpRequest.getSignedHeaders(
+        headers: {},
+        signedHeaderNames: ['host'],
         host: 'host',
         amzDate: 'amzDate',
       );
@@ -128,7 +143,7 @@ void main() {
   group('getCanonicalRequest', () {
     test('getCanonicalRequest - 1', () {
       final String requestString = AwsHttpRequest.getCanonicalRequest(
-        type: AwsRequestType.post.toString().toUpperCase().split('.').last,
+        type: AwsRequestType.post.name.toUpperCase(),
         requestBody: 'requestBody',
         signedHeaders: {'signedHeaderKey': 'signedHeaderValue'},
         canonicalUri: 'canonical/Uri',
@@ -148,7 +163,7 @@ fcf523fac03a2e3a814b7f97bf8c9533d657677c72ff3870afd69cef3b559c60''',
     });
     test('getCanonicalRequest - 2', () {
       final String requestString = AwsHttpRequest.getCanonicalRequest(
-        type: AwsRequestType.delete.toString().toUpperCase().split('.').last,
+        type: AwsRequestType.delete.name.toUpperCase(),
         requestBody: '',
         signedHeaders: {
           'signedHeaderKey': 'signedHeaderValue',
@@ -175,21 +190,20 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
   });
 
   group('getAuth', () {
-    final String dateStamp =
-        DateFormat('yyyyMMdd').format(DateTime.now().toUtc());
-
-    test('empty', () {
+    test('empty credentials', () {
+      const String amzDate = '20260101T000000Z';
+      const String dateStamp = '20260101';
       final String auth = AwsHttpRequest.getAuth(
         awsSecretKey: '',
         awsAccessKey: '',
-        amzDate: '',
+        amzDate: amzDate,
         canonicalRequest: '',
         region: '',
         service: '',
         signedHeaders: {},
       );
       final String stringToSign =
-          'AWS4-HMAC-SHA256\n\n$dateStamp///aws4_request\n'
+          'AWS4-HMAC-SHA256\n$amzDate\n$dateStamp///aws4_request\n'
           '${sha256.convert(utf8.encode('')).toString()}';
       final String signature = AwsHttpRequest.getSignature(
         key: '',
@@ -204,17 +218,19 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
       );
     });
     test('strings', () {
+      const String amzDate = '20260315T120000Z';
+      const String dateStamp = '20260315';
       final String auth = AwsHttpRequest.getAuth(
         awsSecretKey: 'awsSecretKey',
         awsAccessKey: 'awsAccessKey',
-        amzDate: 'amzDate',
+        amzDate: amzDate,
         canonicalRequest: 'canonicalRequest',
         region: 'region',
         service: 'service',
         signedHeaders: {'signedHeaders': 'signedHeaders'},
       );
       final String stringToSign =
-          'AWS4-HMAC-SHA256\namzDate\n$dateStamp/region/service/aws4_request\n'
+          'AWS4-HMAC-SHA256\n$amzDate\n$dateStamp/region/service/aws4_request\n'
           '${sha256.convert(utf8.encode('canonicalRequest')).toString()}';
       final String signature = AwsHttpRequest.getSignature(
         key: 'awsSecretKey',
@@ -229,10 +245,12 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
       );
     });
     test('headers unsorted', () {
+      const String amzDate = '20260315T120000Z';
+      const String dateStamp = '20260315';
       final String auth = AwsHttpRequest.getAuth(
         awsSecretKey: 'awsSecretKey',
         awsAccessKey: 'awsAccessKey',
-        amzDate: 'amzDate',
+        amzDate: amzDate,
         canonicalRequest: 'canonicalRequest',
         region: 'region',
         service: 'service',
@@ -243,7 +261,7 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
         },
       );
       final String stringToSign =
-          'AWS4-HMAC-SHA256\namzDate\n$dateStamp/region/service/aws4_request\n'
+          'AWS4-HMAC-SHA256\n$amzDate\n$dateStamp/region/service/aws4_request\n'
           '${sha256.convert(utf8.encode('canonicalRequest')).toString()}';
       final String signature = AwsHttpRequest.getSignature(
         key: 'awsSecretKey',
@@ -262,12 +280,9 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
   group('getHeaders', () {
     test('strings', () {
       final Map<String, String> res = AwsHttpRequest.getHeaders(
-        host: 'host',
-        requestBody: 'requestBody',
         headers: {'c': 'c'},
         amzDate: 'amzDate',
         auth: 'auth',
-        timeout: const Duration(),
       );
       expect(
         {
@@ -282,8 +297,6 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
     });
     test('overwrite string', () {
       final Map<String, String> res = AwsHttpRequest.getHeaders(
-        host: 'host',
-        requestBody: 'requestBody',
         headers: {
           'Accept': '',
           'Content-Type': '',
@@ -292,50 +305,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
         },
         amzDate: 'amzDate',
         auth: 'auth',
-        timeout: const Duration(),
       );
       expect(
         {
           'Accept': '',
           'Content-Type': '',
-          'Authorization': 'auth',
-          'x-amz-date': 'amzDate',
-        },
-        res,
-      );
-    });
-    test('increased timeout', () {
-      final Map<String, String> res = AwsHttpRequest.getHeaders(
-        host: 'host',
-        requestBody: 'requestBody',
-        headers: {},
-        amzDate: 'amzDate',
-        auth: 'auth',
-        timeout: const Duration(seconds: 123456789),
-      );
-      expect(
-        {
-          'Accept': '*/*',
-          'Content-Type': 'application/x-amz-json-1.1',
-          'Authorization': 'auth',
-          'x-amz-date': 'amzDate',
-        },
-        res,
-      );
-    });
-    test('increased timeout', () {
-      final Map<String, String> res = AwsHttpRequest.getHeaders(
-        host: 'host',
-        requestBody: 'requestBody',
-        headers: {},
-        amzDate: 'amzDate',
-        auth: 'auth',
-        timeout: const Duration(milliseconds: 10),
-      );
-      expect(
-        {
-          'Accept': '*/*',
-          'Content-Type': 'application/x-amz-json-1.1',
           'Authorization': 'auth',
           'x-amz-date': 'amzDate',
         },
@@ -345,77 +319,93 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
   });
 
   group('getRequest', () {
+    Future<Response> mockFunction(Request request) async {
+      return Response(request.method, 200);
+    }
+
     test('AwsRequestType.DELETE', () {
       return AwsHttpRequest.getRequest(
         type: AwsRequestType.delete,
-        url: Uri.parse('https://www.google.com'),
+        url: Uri.parse('https://www.example.com'),
         headers: {},
         body: '',
         timeout: const Duration(seconds: 10),
-      ).then((value) {}, onError: (err) {
-        fail('Missing type! AwsRequestType.DELETE, $err');
+        mockRequest: true,
+        mockFunction: mockFunction,
+      ).then((value) {
+        expect(value.body, 'DELETE');
       });
     });
     test('AwsRequestType.GET', () {
       return AwsHttpRequest.getRequest(
         type: AwsRequestType.get,
-        url: Uri.parse('https://www.google.com'),
+        url: Uri.parse('https://www.example.com'),
         headers: {},
         body: '',
         timeout: const Duration(seconds: 10),
-      ).then((value) {}, onError: (err) {
-        fail('Missing type! AwsRequestType.GET, $err');
+        mockRequest: true,
+        mockFunction: mockFunction,
+      ).then((value) {
+        expect(value.body, 'GET');
       });
     });
     test('AwsRequestType.HEAD', () {
       return AwsHttpRequest.getRequest(
         type: AwsRequestType.head,
-        url: Uri.parse('https://www.google.com'),
+        url: Uri.parse('https://www.example.com'),
         headers: {},
         body: '',
         timeout: const Duration(seconds: 10),
-      ).then((value) {}, onError: (err) {
-        fail('Missing type! AwsRequestType.HEAD, $err');
+        mockRequest: true,
+        mockFunction: mockFunction,
+      ).then((value) {
+        expect(value.body, 'HEAD');
       });
     });
     test('AwsRequestType.PATCH', () {
       return AwsHttpRequest.getRequest(
         type: AwsRequestType.patch,
-        url: Uri.parse('https://www.google.com'),
+        url: Uri.parse('https://www.example.com'),
         headers: {},
         body: '',
         timeout: const Duration(seconds: 10),
-      ).then((value) {}, onError: (err) {
-        fail('Missing type! AwsRequestType.PATCH, $err');
+        mockRequest: true,
+        mockFunction: mockFunction,
+      ).then((value) {
+        expect(value.body, 'PATCH');
       });
     });
     test('AwsRequestType.POST', () {
       return AwsHttpRequest.getRequest(
         type: AwsRequestType.post,
-        url: Uri.parse('https://www.google.com'),
+        url: Uri.parse('https://www.example.com'),
         headers: {},
         body: '',
         timeout: const Duration(seconds: 10),
-      ).then((value) {}, onError: (err) {
-        fail('Missing type! AwsRequestType.POST, $err');
+        mockRequest: true,
+        mockFunction: mockFunction,
+      ).then((value) {
+        expect(value.body, 'POST');
       });
     });
     test('AwsRequestType.PUT', () {
       return AwsHttpRequest.getRequest(
         type: AwsRequestType.put,
-        url: Uri.parse('https://www.google.com'),
+        url: Uri.parse('https://www.example.com'),
         headers: {},
         body: '',
         timeout: const Duration(seconds: 10),
-      ).then((value) {}, onError: (err) {
-        fail('Missing type! AwsRequestType.PUT, $err');
+        mockRequest: true,
+        mockFunction: mockFunction,
+      ).then((value) {
+        expect(value.body, 'PUT');
       });
     });
 
     test('failure', () {
       return AwsHttpRequest.getRequest(
         type: AwsRequestType.get,
-        url: Uri.parse('https://www.google.com'),
+        url: Uri.parse('https://www.example.com'),
         headers: {},
         body: '',
         timeout: const Duration(seconds: 10),
@@ -428,30 +418,13 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
       });
     });
 
-    test('mockFunction != null', () {
-      Future<Response> mockFunction(Request request) async {
-        return Response('', 500);
-      }
-
-      return AwsHttpRequest.getRequest(
-        type: AwsRequestType.get,
-        url: Uri.parse('https://www.google.com'),
-        headers: {},
-        body: '',
-        timeout: const Duration(seconds: 10),
-        mockFunction: mockFunction,
-      ).then((val) {}, onError: (err) {
-        fail(err);
-      });
-    });
-
     test('check MockClient', () {
       final Request request = Request(
         'GET',
-        Uri.parse('https://www.google.com'),
+        Uri.parse('https://www.example.com'),
       );
 
-      Future<Response> mockFunction(Request request) async {
+      Future<Response> innerMockFunction(Request request) async {
         return Response(
           '',
           500,
@@ -461,11 +434,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
 
       return AwsHttpRequest.getRequest(
         type: AwsRequestType.get,
-        url: Uri.parse('https://www.google.com'),
+        url: Uri.parse('https://www.example.com'),
         headers: {},
         body: '',
         timeout: const Duration(seconds: 10),
-        mockFunction: mockFunction,
+        mockFunction: innerMockFunction,
         mockRequest: true,
       ).then((val) {
         expect(
@@ -592,6 +565,49 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
         ).then((val) {
           expect(val.body, 'HEAD');
         });
+      });
+    });
+    test('custom endpoint', () {
+      Future<Response> endpointMock(Request request) async {
+        return Response(request.url.host, 200);
+      }
+
+      return AwsHttpRequest.send(
+        awsSecretKey: 'awsSecretKey',
+        awsAccessKey: 'awsAccessKey',
+        type: AwsRequestType.get,
+        service: 'service',
+        region: 'region',
+        timeout: const Duration(seconds: 10),
+        headers: {},
+        jsonBody: '',
+        canonicalUri: '/',
+        endpoint: 'mybucket.s3.us-east-1.amazonaws.com',
+        mockRequest: true,
+        mockFunction: endpointMock,
+      ).then((val) {
+        expect(val.body, 'mybucket.s3.us-east-1.amazonaws.com');
+      });
+    });
+    test('default endpoint', () {
+      Future<Response> endpointMock(Request request) async {
+        return Response(request.url.host, 200);
+      }
+
+      return AwsHttpRequest.send(
+        awsSecretKey: 'awsSecretKey',
+        awsAccessKey: 'awsAccessKey',
+        type: AwsRequestType.get,
+        service: 'logs',
+        region: 'us-east-1',
+        timeout: const Duration(seconds: 10),
+        headers: {},
+        jsonBody: '',
+        canonicalUri: '/',
+        mockRequest: true,
+        mockFunction: endpointMock,
+      ).then((val) {
+        expect(val.body, 'logs.us-east-1.amazonaws.com');
       });
     });
     test('Timeout', () async {

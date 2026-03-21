@@ -55,6 +55,10 @@
     If you have feedback or have a use case that isn't covered feel free to open an issue.
 </p>
 
+## Requirements
+
+- Dart SDK `>=3.0.0 <4.0.0`
+
 ## Getting Started
 
 Create a request and send it!
@@ -62,13 +66,13 @@ Create a request and send it!
 ~~~dart
 import 'package:aws_request/aws_request.dart';
 
-main() {
-  final AwsRequest request = new AwsRequest(
+void main() {
+  final AwsRequest request = AwsRequest(
     awsAccessKey: 'awsAccessKey',
-    awsSecretKey: 'awsSecretKey', 
+    awsSecretKey: 'awsSecretKey',
     region: 'region',
   );
-  request.send(type: AwsRequestType.post);
+  request.send(type: AwsRequestType.post, service: 'logs');
 }
 ~~~
 
@@ -85,11 +89,38 @@ headers: any required headers. Any non-default headers included in the signedHea
 jsonBody: the body of the request, formatted as json
 queryPath: the aws query path
 queryString: the url query string as a Map
+timeout: overrides the constructor request timeout (default: 10 seconds)
+endpoint: custom hostname override (defaults to {service}.{region}.amazonaws.com)
 ~~~
 
 Supported HTTP methods are GET, POST, DELETE, PATCH, PUT, HEAD.
 
 ## Important Notes:
+
+### Default Headers
+
+The default `Content-Type` is `application/x-amz-json-1.1`, which works for most AWS
+JSON-protocol services (CloudWatch Logs, Lambda, etc.). Some services require a different
+value — for example, DynamoDB uses `application/x-amz-json-1.0`, and S3/SQS/SNS use XML
+content types. Override via the `headers` parameter when needed.
+
+### Custom Endpoints
+
+By default, requests are sent to `{service}.{region}.amazonaws.com`. If you need a
+non-standard endpoint (S3 virtual-hosted-style buckets, VPC endpoints, LocalStack, etc.),
+pass the `endpoint` parameter:
+
+~~~dart
+final AwsRequest request = AwsRequest(
+  awsAccessKey: 'awsAccessKey',
+  awsSecretKey: 'awsSecretKey',
+  region: 'us-east-1',
+  endpoint: 'mybucket.s3.us-east-1.amazonaws.com',
+);
+~~~
+
+The `endpoint` can also be passed per-request via `send()` or `staticSend()`, and will
+override the constructor value.
 
 ### Android
 
@@ -110,7 +141,7 @@ import 'package:aws_request/aws_request.dart';
 import 'package:http/http.dart';
 
 Future<void> awsRequestFunction(String logString) async {
-  final AwsRequest request = new AwsRequest(
+  final AwsRequest request = AwsRequest(
     awsAccessKey: 'awsAccessKey',
     awsSecretKey: 'awsSecretKey',
     region: 'region',
@@ -118,7 +149,7 @@ Future<void> awsRequestFunction(String logString) async {
   final Response result = await request.send(
     type: AwsRequestType.post,
     jsonBody: "{'jsonKey': 'jsonValue'}",
-    service: 'lambda',
+    service: 'logs',
     queryString: {'X-Amz-Expires': '10'},
     headers: {'X-Amz-Security-Token': 'XXXXXXXXXXXX'},
   );
@@ -134,8 +165,8 @@ There is also a static method if you find that more useful:
 import 'package:aws_request/aws_request.dart';
 import 'package:http/http.dart';
 
-void awsRequestFunction(String logString) async {
-  Response result = await AwsRequest.staticSend(
+Future<void> awsRequestFunction(String logString) async {
+  final Response result = await AwsRequest.staticSend(
     awsAccessKey: 'awsAccessKey',
     awsSecretKey: 'awsSecretKey',
     region: 'region',
@@ -144,6 +175,35 @@ void awsRequestFunction(String logString) async {
     service: 'logs',
     queryString: {'X-Amz-Expires': '10'},
     headers: {'X-Amz-Security-Token': 'XXXXXXXXXXXX'},
+  );
+  print(result.statusCode);
+}
+~~~
+
+## Testing
+
+A `MockAwsRequest` class is provided for testing via the `testing` library.
+It mirrors the `AwsRequest` API but uses a mock HTTP client instead of making
+real network calls:
+
+~~~dart
+import 'package:aws_request/testing.dart';
+import 'package:http/http.dart';
+
+void main() {
+  final MockAwsRequest mockRequest = MockAwsRequest(
+    awsAccessKey: 'awsAccessKey',
+    awsSecretKey: 'awsSecretKey',
+    region: 'region',
+    mockFunction: (Request request) async {
+      return Response('{"status": "ok"}', 200);
+    },
+  );
+
+  mockRequest.send(
+    type: AwsRequestType.post,
+    service: 'logs',
+    jsonBody: '{"key": "value"}',
   );
 }
 ~~~
