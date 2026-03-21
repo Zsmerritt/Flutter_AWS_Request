@@ -20,13 +20,6 @@ class AwsHttpRequest {
         'Z';
   }
 
-  static String _formatDateStamp(DateTime dt) {
-    final DateTime utc = dt.toUtc();
-    return '${utc.year.toString().padLeft(4, '0')}'
-        '${utc.month.toString().padLeft(2, '0')}'
-        '${utc.day.toString().padLeft(2, '0')}';
-  }
-
   static Map<String, String> getSignedHeaders({
     required Map<String, String> headers,
     required List<String> signedHeaderNames,
