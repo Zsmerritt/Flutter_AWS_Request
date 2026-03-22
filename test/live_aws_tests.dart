@@ -47,13 +47,11 @@ const String _iamSignRegion = 'us-east-1';
 
 final class _LiveAwsCreds {
   _LiveAwsCreds._(this.env)
-      : region =
-            env['AWS_DEFAULT_REGION'] ?? env['AWS_REGION'] ?? 'us-east-1',
+      : region = env['AWS_DEFAULT_REGION'] ?? env['AWS_REGION'] ?? 'us-east-1',
         accessKey = env['AWS_ACCESS_KEY_ID']!,
         secretKey = env['AWS_SECRET_ACCESS_KEY']!,
         sessionToken = env['AWS_SESSION_TOKEN'],
-        hasSessionToken =
-            (env['AWS_SESSION_TOKEN'] ?? '').trim().isNotEmpty;
+        hasSessionToken = (env['AWS_SESSION_TOKEN'] ?? '').trim().isNotEmpty;
 
   factory _LiveAwsCreds.fromEnv(Map<String, String> env) =>
       _LiveAwsCreds._(env);
@@ -232,7 +230,8 @@ void _expect200OrAwsAccessDenied(
   expect(
     _awsAccessDeniedLike.hasMatch(response.body),
     isTrue,
-    reason: 'Expected AWS access / authorization style body, got: ${response.body}',
+    reason:
+        'Expected AWS access / authorization style body, got: ${response.body}',
   );
 }
 
@@ -291,8 +290,7 @@ void main() {
         expect(
           _awsSigV4OrCredentialFailureLike.hasMatch(response.body),
           isTrue,
-          reason:
-              'Expected AWS SigV4/signature/credential error in body, got '
+          reason: 'Expected AWS SigV4/signature/credential error in body, got '
               'status=${response.statusCode}: ${response.body}',
         );
       },
@@ -301,15 +299,15 @@ void main() {
 
     // IAM JSON RPC (`X-Amz-Target`) has returned 302 redirects for some clients
     // hitting `iam.amazonaws.com`; the Query API matches STS and is stable here.
-    test('iam:GetUser (Query POST, XML, caller when UserName omitted)', () async {
+    test('iam:GetUser (Query POST, XML, caller when UserName omitted)',
+        () async {
       final Response response = await c.postForm(
         service: 'iam',
         region: _iamSignRegion,
         endpoint: 'iam.amazonaws.com',
         body: 'Action=GetUser&Version=2010-05-08',
       );
-      _expect200OrAwsAccessDenied(response,
-          context: 'iam:GetUser',
+      _expect200OrAwsAccessDenied(response, context: 'iam:GetUser',
           onOk: (Response ok) {
         expect(ok.body, contains('GetUserResponse'));
       });
@@ -321,8 +319,7 @@ void main() {
         region: c.region,
         body: 'Action=DescribeRegions&Version=2016-11-15',
       );
-      _expect200OrAwsAccessDenied(response,
-          context: 'ec2:DescribeRegions',
+      _expect200OrAwsAccessDenied(response, context: 'ec2:DescribeRegions',
           onOk: (Response ok) {
         expect(ok.body, contains('DescribeRegionsResponse'));
         expect(ok.body, contains('regionName'));
@@ -335,8 +332,7 @@ void main() {
         region: c.region,
         body: 'Action=ListQueues&Version=2012-11-05',
       );
-      _expect200OrAwsAccessDenied(response,
-          context: 'sqs:ListQueues',
+      _expect200OrAwsAccessDenied(response, context: 'sqs:ListQueues',
           onOk: (Response ok) {
         expect(ok.body, contains('ListQueuesResponse'));
       });
@@ -349,8 +345,7 @@ void main() {
         target: 'AWSLambda_20150331.ListFunctions',
         jsonBody: '{"MaxItems":1}',
       );
-      _expect200OrAwsAccessDenied(response,
-          context: 'lambda:ListFunctions',
+      _expect200OrAwsAccessDenied(response, context: 'lambda:ListFunctions',
           onOk: (Response ok) {
         expect(ok.body, contains('"Functions"'));
       });
@@ -363,8 +358,7 @@ void main() {
         target: 'TrentService.ListKeys',
         jsonBody: '{"Limit":1}',
       );
-      _expect200OrAwsAccessDenied(response,
-          context: 'kms:ListKeys',
+      _expect200OrAwsAccessDenied(response, context: 'kms:ListKeys',
           onOk: (Response ok) {
         expect(ok.body, contains('"Keys"'));
       });
@@ -376,8 +370,7 @@ void main() {
         region: c.region,
         body: 'Action=ListTopics&Version=2010-03-31',
       );
-      _expect200OrAwsAccessDenied(response,
-          context: 'sns:ListTopics',
+      _expect200OrAwsAccessDenied(response, context: 'sns:ListTopics',
           onOk: (Response ok) {
         expect(ok.body, contains('ListTopicsResponse'));
       });

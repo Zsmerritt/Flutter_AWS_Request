@@ -135,8 +135,7 @@ void main() {
             mockFunction: (Request request) async {
               return Response('', 200);
             },
-          )
-            ..service = 'service';
+          )..service = 'service';
           await awsRequest.send(type: AwsRequestType.get);
         } catch (e) {
           print(e);
