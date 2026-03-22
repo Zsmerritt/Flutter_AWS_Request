@@ -194,14 +194,31 @@ class AwsHttpRequest {
     required String canonicalQuerystring,
     bool hashedPayloadIsUnsigned = false,
   }) {
-    final List<String> canonicalHeaders = [];
-    signedHeaders.forEach((key, value) {
-      canonicalHeaders.add(
-          '$key:${canonicalHeaderValueForSigV4(value)}\n');
-    });
-    canonicalHeaders.sort();
-    final String canonicalHeadersString = canonicalHeaders.join('');
-    final List<String> keyList = signedHeaders.keys.toList()..sort();
+    // Sort by header name only (AWS), not by the full "name:value" line — a
+    // prefix name like "a" must sort before "a1" (":" > "1" would break line sort).
+    final List<MapEntry<String, String>> lowered =
+        signedHeaders.entries
+            .map(
+              (MapEntry<String, String> e) => MapEntry<String, String>(
+                e.key.toLowerCase(),
+                e.value,
+              ),
+            )
+            .toList()
+          ..sort(
+            (MapEntry<String, String> a, MapEntry<String, String> b) =>
+                a.key.compareTo(b.key),
+          );
+    final String canonicalHeadersString = lowered
+        .map(
+          (MapEntry<String, String> e) =>
+              '${e.key}:${canonicalHeaderValueForSigV4(e.value)}\n',
+        )
+        .join('');
+    final List<String> keyList = signedHeaders.keys
+        .map((String k) => k.toLowerCase())
+        .toList()
+      ..sort();
     final String signedHeaderKeys = keyList.join(';');
     final String payloadHash = hashedPayloadIsUnsigned
         ? sha256.convert(utf8.encode('UNSIGNED-PAYLOAD')).toString()
@@ -240,7 +257,10 @@ class AwsHttpRequest {
       serviceName: serviceLc,
       stringToSign: stringToSign,
     );
-    final List<String> keyList = signedHeaders.keys.toList()..sort();
+    final List<String> keyList = signedHeaders.keys
+        .map((String k) => k.toLowerCase())
+        .toList()
+      ..sort();
     final String signedHeaderKeys = keyList.join(';');
     return '$algorithm Credential=$awsAccessKey/$credentialScope, '
         'SignedHeaders=$signedHeaderKeys, '

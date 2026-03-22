@@ -1,3 +1,7 @@
+# Local AWS credentials (never commit)
+.env*
+.env.local
+
 # Miscellaneous
 *.class
 *.log

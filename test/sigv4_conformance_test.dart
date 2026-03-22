@@ -72,6 +72,31 @@ void main() {
     );
 
     test(
+      'post_header_key_case_lowercases_header_names_per_canonical_headers_rules',
+      () {
+        // Suite post-header-key-case: HTTP header names may be mixed case; the
+        // canonical request must use lowercase names only (same AWS doc).
+        const String expectedCreq = 'POST\n/\n\n'
+            'host:example.amazonaws.com\n'
+            'x-amz-date:20150830T123600Z\n'
+            '\n'
+            'host;x-amz-date\n'
+            'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+        final String actual = AwsHttpRequest.getCanonicalRequest(
+          type: 'POST',
+          requestBody: '',
+          signedHeaders: const <String, String>{
+            'Host': 'example.amazonaws.com',
+            'X-Amz-Date': kAwsSuiteAmzDate,
+          },
+          canonicalUri: '/',
+          canonicalQuerystring: '',
+        );
+        expect(actual, expectedCreq);
+      },
+    );
+
+    test(
       'get_header_value_trim_matches_suite_when_values_are_sigv4_normalized',
       () {
         // Scenario: get-header-value-trim — AWS requires Trim() and collapsing

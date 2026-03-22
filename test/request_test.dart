@@ -183,9 +183,9 @@ void main() {
 POST
 canonical/Uri
 canonicalQuerystring=canonicalQuerystring
-signedHeaderKey:signedHeaderValue
+signedheaderkey:signedHeaderValue
 
-signedHeaderKey
+signedheaderkey
 fcf523fac03a2e3a814b7f97bf8c9533d657677c72ff3870afd69cef3b559c60''',
         requestString,
       );
@@ -200,18 +200,18 @@ fcf523fac03a2e3a814b7f97bf8c9533d657677c72ff3870afd69cef3b559c60''',
           'signedHeaderKey2': 'signedHeaderValue2',
         },
         canonicalUri: 'canonical/Uri',
-        canonicalQuerystring: '/',
+        canonicalQuerystring: '',
       );
       expect(
         '''
 DELETE
 canonical/Uri
-/
-signedHeaderKey1:signedHeaderValue1
-signedHeaderKey2:signedHeaderValue2
-signedHeaderKey:signedHeaderValue
 
-signedHeaderKey;signedHeaderKey1;signedHeaderKey2
+signedheaderkey:signedHeaderValue
+signedheaderkey1:signedHeaderValue1
+signedheaderkey2:signedHeaderValue2
+
+signedheaderkey;signedheaderkey1;signedheaderkey2
 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
         requestString,
       );
@@ -269,7 +269,7 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
         stringToSign: stringToSign,
       );
       expect(
-        'AWS4-HMAC-SHA256 Credential=awsAccessKey/$dateStamp/region/service/aws4_request, SignedHeaders=signedHeaders, Signature=$signature',
+        'AWS4-HMAC-SHA256 Credential=awsAccessKey/$dateStamp/region/service/aws4_request, SignedHeaders=signedheaders, Signature=$signature',
         auth,
       );
     });

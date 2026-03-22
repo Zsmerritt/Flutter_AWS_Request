@@ -114,6 +114,32 @@ void main() {
     );
   });
 
+  group('SigV4 regression: canonical header name sort (prefix safety)', () {
+    test(
+      'canonical_headers_sort_by_name_not_by_full_line_so_a_before_a1',
+      () {
+        // If we sorted the full "name:value" lines, "a:x" would sort after
+        // "a1:x" because ':' (58) > '1' (49). AWS orders by header name only.
+        final String canonical = AwsHttpRequest.getCanonicalRequest(
+          type: 'GET',
+          requestBody: '',
+          signedHeaders: const <String, String>{
+            'a1': 'v',
+            'a': 'v',
+            'z': 'v',
+          },
+          canonicalUri: '/',
+          canonicalQuerystring: '',
+        );
+        expect(
+          canonical,
+          'GET\n/\n\na:v\na1:v\nz:v\n\na;a1;z\n'
+          'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        );
+      },
+    );
+  });
+
   group('SigV4 regression: canonical header normalization', () {
     test(
       'canonical_header_values_require_trim_and_collapse_internal_spaces',
@@ -127,6 +153,26 @@ void main() {
           signedHeaders: const <String, String>{
             'host': kAwsSuiteHost,
             'my-header1': 'value1',
+            'my-header2': '"a   b   c"',
+            'x-amz-date': kAwsSuiteAmzDate,
+          },
+          canonicalUri: '/',
+          canonicalQuerystring: '',
+        );
+        expect(actual, kGetHeaderValueTrimCreq);
+      },
+    );
+
+    test(
+      'canonical_header_values_trim_leading_and_trailing_whitespace',
+      () {
+        // sigv4-create-canonical-request — Trim() on header values.
+        final String actual = AwsHttpRequest.getCanonicalRequest(
+          type: 'GET',
+          requestBody: '',
+          signedHeaders: <String, String>{
+            'host': kAwsSuiteHost,
+            'my-header1': '  value1  ',
             'my-header2': '"a   b   c"',
             'x-amz-date': kAwsSuiteAmzDate,
           },
