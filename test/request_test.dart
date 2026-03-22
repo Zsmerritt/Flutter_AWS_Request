@@ -7,6 +7,21 @@ import 'package:http/http.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('sortedQueryParameters', () {
+    test('null returns null', () {
+      expect(AwsHttpRequest.sortedQueryParameters(null), isNull);
+    });
+
+    test('sorts by key then value', () {
+      final Map<String, String>? sorted = AwsHttpRequest.sortedQueryParameters(
+        <String, String>{'b': '2', 'a': '1'},
+      );
+      expect(sorted!.keys.toList(), <String>['a', 'b']);
+      expect(sorted['a'], '1');
+      expect(sorted['b'], '2');
+    });
+  });
+
   group('getSignedHeaders', () {
     test('getSignedHeaders', () {
       const Map<String, String> correctSignedHeaders = {
@@ -77,6 +92,23 @@ void main() {
           AwsHttpRequest.getSignedHeaders(
         headers: {},
         signedHeaderNames: ['host'],
+        host: 'host',
+        amzDate: 'amzDate',
+      );
+      expect(generatedSignedHeaders, correctSignedHeaders);
+    });
+
+    test('getSignedHeaders resolves signedHeaderNames case-insensitively', () {
+      const Map<String, String> correctSignedHeaders = {
+        'host': 'host',
+        'x-amz-date': 'amzDate',
+        'x-amz-security-token': 'token',
+        'content-type': 'application/x-amz-json-1.1'
+      };
+      final Map<String, String> generatedSignedHeaders =
+          AwsHttpRequest.getSignedHeaders(
+        headers: {'X-Amz-Security-Token': 'token'},
+        signedHeaderNames: ['x-amz-security-token'],
         host: 'host',
         amzDate: 'amzDate',
       );
@@ -630,6 +662,45 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855''',
         return;
       }
       fail('Timeout did not occur!');
+    });
+
+    test('rejects empty awsAccessKey', () async {
+      try {
+        await AwsHttpRequest.send(
+          awsSecretKey: 'awsSecretKey',
+          awsAccessKey: '',
+          type: AwsRequestType.get,
+          service: 'service',
+          region: 'region',
+          timeout: const Duration(seconds: 10),
+          headers: {},
+          jsonBody: '',
+          canonicalUri: '/',
+          mockRequest: true,
+          mockFunction: mockFunction,
+        );
+      } catch (e) {
+        expect(e, isA<AwsRequestException>());
+        return;
+      }
+      fail('expected AwsRequestException');
+    });
+
+    test('canonical query string matches Uri.query encoding', () {
+      final Map<String, String> sorted = Map<String, String>.fromEntries(
+        <MapEntry<String, String>>[
+          const MapEntry('b', '2'),
+          const MapEntry('a', '1'),
+        ]..sort((MapEntry<String, String> a, MapEntry<String, String> b) =>
+            a.key.compareTo(b.key)),
+      );
+      final Uri url = Uri(
+        scheme: 'https',
+        host: 'host',
+        path: '/',
+        queryParameters: sorted,
+      );
+      expect(url.query, 'a=1&b=2');
     });
   });
 }

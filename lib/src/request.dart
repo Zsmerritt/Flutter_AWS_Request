@@ -20,6 +20,27 @@ class AwsHttpRequest {
         'Z';
   }
 
+  /// Returns a copy of [canonicalQuery] with entries sorted by key, then by
+  /// value, per SigV4 canonical query rules. Returns null when
+  /// [canonicalQuery] is null.
+  static Map<String, String>? sortedQueryParameters(
+    Map<String, String>? canonicalQuery,
+  ) {
+    if (canonicalQuery == null) {
+      return null;
+    }
+    return Map<String, String>.fromEntries(
+      canonicalQuery.entries.toList()
+        ..sort((MapEntry<String, String> a, MapEntry<String, String> b) {
+          final int c = a.key.compareTo(b.key);
+          if (c != 0) {
+            return c;
+          }
+          return a.value.compareTo(b.value);
+        }),
+    );
+  }
+
   static Map<String, String> getSignedHeaders({
     required Map<String, String> headers,
     required List<String> signedHeaderNames,
@@ -30,24 +51,32 @@ class AwsHttpRequest {
       'host': host,
       'x-amz-date': amzDate,
     };
-    for (final String key in signedHeaderNames) {
-      if (signedHeaders.containsKey(key)) {
+    for (final String requestedName in signedHeaderNames) {
+      final String lower = requestedName.toLowerCase();
+      if (signedHeaders.containsKey(lower)) {
         continue;
       }
-      if (headers.containsKey(key)) {
-        signedHeaders[key] = headers[key]!;
+      final String? keyInHeaders = headers.keys
+          .cast<String?>()
+          .firstWhere((k) => k!.toLowerCase() == lower, orElse: () => null);
+      if (keyInHeaders != null) {
+        signedHeaders[lower] = headers[keyInHeaders]!;
       } else {
         throw AwsRequestException(
             message: 'AwsRequest ERROR: Signed Header Not Found: '
-                '$key could not be found in the included headers. '
+                '$requestedName could not be found in the included headers. '
                 'Provided header keys are ${headers.keys.toList()} '
                 'All headers besides [content-type, host, x-amz-date] '
                 'that are included in signedHeaders must be included in headers',
             stackTrace: StackTrace.current);
       }
     }
-    if (headers.containsKey('content-type')) {
-      signedHeaders['content-type'] = headers['content-type']!;
+    final String? contentTypeKey = headers.keys
+        .cast<String?>()
+        .firstWhere((k) => k!.toLowerCase() == 'content-type',
+            orElse: () => null);
+    if (contentTypeKey != null) {
+      signedHeaders['content-type'] = headers[contentTypeKey]!;
     } else {
       signedHeaders['content-type'] = 'application/x-amz-json-1.1';
     }
@@ -151,7 +180,7 @@ class AwsHttpRequest {
   }) async {
     if (mockRequest && mockFunction == null) {
       throw AwsRequestException(
-        message: 'Mocking function request to mock AwsRequests',
+        message: 'mockFunction is required when mockRequest is true',
         stackTrace: StackTrace.current,
       );
     }
@@ -224,12 +253,24 @@ class AwsHttpRequest {
     bool mockRequest = false,
     Future<Response> Function(Request)? mockFunction,
   }) async {
+    if (awsAccessKey.isEmpty || awsSecretKey.isEmpty) {
+      throw AwsRequestException(
+        message: 'AwsRequest ERROR: awsAccessKey and awsSecretKey must be '
+            'non-empty strings.',
+        stackTrace: StackTrace.current,
+      );
+    }
     final String host = endpoint ?? '$service.$region.amazonaws.com';
+    // SigV4 canonical query must match the exact query string on the wire.
+    // Build a sorted map first, then let [Uri] encode it — do not hand-roll
+    // encodeQueryComponent (encoding can differ from [Uri.query]).
+    final Map<String, String>? sortedQueryParams =
+        sortedQueryParameters(canonicalQuery);
     final Uri url = Uri(
       scheme: 'https',
       host: host,
       path: canonicalUri,
-      queryParameters: canonicalQuery,
+      queryParameters: sortedQueryParams,
     );
     final String amzDate = _formatAmzDate(DateTime.now());
     final Map<String, String> signedHeadersMap = getSignedHeaders(
@@ -239,12 +280,13 @@ class AwsHttpRequest {
       amzDate: amzDate,
     );
 
+    final String sortedCanonicalQuery = url.query;
     final String canonicalRequest = getCanonicalRequest(
       type: type.name.toUpperCase(),
       requestBody: jsonBody,
       signedHeaders: signedHeadersMap,
-      canonicalUri: canonicalUri,
-      canonicalQuerystring: url.query,
+      canonicalUri: url.path,
+      canonicalQuerystring: sortedCanonicalQuery,
     );
     final String auth = getAuth(
       awsSecretKey: awsSecretKey,

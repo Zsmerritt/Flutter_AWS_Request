@@ -88,7 +88,7 @@ headers: any required headers. Any non-default headers included in the signedHea
          must be added here.
 jsonBody: the body of the request, formatted as json
 queryPath: the aws query path
-queryString: the url query string as a Map
+queryString: the url query string as a Map (duplicate keys not supported; Dart Map limitation)
 timeout: overrides the constructor request timeout (default: 10 seconds)
 endpoint: custom hostname override (defaults to {service}.{region}.amazonaws.com)
 ~~~
@@ -96,6 +96,14 @@ endpoint: custom hostname override (defaults to {service}.{region}.amazonaws.com
 Supported HTTP methods are GET, POST, DELETE, PATCH, PUT, HEAD.
 
 ## Important Notes:
+
+### Temporary credentials (STS, IAM roles)
+
+Use the temporary access key ID and secret from STS in `awsAccessKey` / `awsSecretKey`.
+You must also pass the session token and sign it: set
+`headers: {'X-Amz-Security-Token': '<token>'}` and
+`signedHeaders: ['x-amz-security-token']` on `send()` / `staticSend` (header names are
+matched case-insensitively).
 
 ### Default Headers
 
@@ -121,6 +129,15 @@ final AwsRequest request = AwsRequest(
 
 The `endpoint` can also be passed per-request via `send()` or `staticSend()`, and will
 override the constructor value.
+
+### Retries and HTTP clients
+
+This package does **not** implement automatic retries (e.g. exponential backoff for HTTP 429/503).
+Add retry logic at your call site if you need it.
+
+Each request uses a short-lived `http` `Client` that is closed after the call (see `getRequest` in
+the implementation). There is no shared connection pool inside the library. For very high throughput,
+consider your own client lifecycle or an AWS SDK.
 
 ### Android
 
@@ -148,7 +165,7 @@ Future<void> awsRequestFunction(String logString) async {
   );
   final Response result = await request.send(
     type: AwsRequestType.post,
-    jsonBody: "{'jsonKey': 'jsonValue'}",
+    jsonBody: '{"jsonKey": "jsonValue"}',
     service: 'logs',
     queryString: {'X-Amz-Expires': '10'},
     headers: {'X-Amz-Security-Token': 'XXXXXXXXXXXX'},
@@ -171,7 +188,7 @@ Future<void> awsRequestFunction(String logString) async {
     awsSecretKey: 'awsSecretKey',
     region: 'region',
     type: AwsRequestType.post,
-    jsonBody: "{'jsonKey': 'jsonValue'}",
+    jsonBody: '{"jsonKey": "jsonValue"}',
     service: 'logs',
     queryString: {'X-Amz-Expires': '10'},
     headers: {'X-Amz-Security-Token': 'XXXXXXXXXXXX'},

@@ -14,7 +14,7 @@ class AwsRequestException implements Exception {
   /// AwsRequestException toString
   @override
   String toString() {
-    return 'AwsRequestException - message: $message';
+    return 'AwsRequestException - message: $message\n$stackTrace';
   }
 }
 

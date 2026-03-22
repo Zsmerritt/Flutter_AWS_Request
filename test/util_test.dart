@@ -16,15 +16,21 @@ void main() {
         message: '',
         stackTrace: StackTrace.empty,
       );
-      expect(exception.toString(), 'AwsRequestException - message: ');
+      expect(
+        exception.toString(),
+        'AwsRequestException - message: \n${StackTrace.empty}',
+      );
     });
     test('toString - filled', () {
+      final StackTrace trace = StackTrace.current;
       final AwsRequestException exception = AwsRequestException(
         message: 'test message',
-        stackTrace: StackTrace.current,
+        stackTrace: trace,
       );
       expect(
-          exception.toString(), 'AwsRequestException - message: test message');
+        exception.toString(),
+        'AwsRequestException - message: test message\n$trace',
+      );
     });
   });
   group('AwsRequestType', () {

@@ -19,11 +19,6 @@ analyzer:
     invalid_assignment: warning
     todo: ignore
     invalid_annotation_target: ignore # https://github.com/rrousselGit/freezed/issues/488
-  exclude:
-    - "**/*.g.dart"
-    - "**/*.freezed.dart"
-    - "**/*.chopper.dart"
-    - "**/*icons.dart"
 
 linter:
   rules:

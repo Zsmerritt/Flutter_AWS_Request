@@ -1,3 +1,13 @@
+## [2.0.1] - 2026/03/22
+
+### Changes:
+
+* Canonical query string for SigV4 now uses the same encoding as the wire request: query parameters are sorted (key, then value), then passed through `Uri` so `url.query` is signed — avoids mismatches from hand-rolled `encodeQueryComponent`
+* `signedHeaders` names are resolved case-insensitively against `headers` (HTTP header names are case-insensitive)
+* `AwsRequestException.toString()` now includes `stackTrace`
+* `AwsHttpRequest.send` rejects empty `awsAccessKey` / `awsSecretKey`
+* README: note on retries and HTTP client lifecycle
+
 ## [2.0.0] - 2026/03/21
 
 ### Breaking Changes:

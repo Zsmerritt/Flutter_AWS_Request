@@ -39,43 +39,35 @@ void main() {
   });
   group('functions', () {
     group('staticSend', () {
-      test('minimum', () {
-        try {
-          MockAwsRequest.staticSend(
-            awsAccessKey: 'awsAccessKey',
-            awsSecretKey: 'awsSecretKey',
-            region: 'region',
-            service: 'service',
-            type: AwsRequestType.get,
-            mockFunction: (Request request) async {
-              return Response('', 200);
-            },
-          );
-        } catch (e) {
-          fail('Could not send request');
-        }
+      test('minimum', () async {
+        await MockAwsRequest.staticSend(
+          awsAccessKey: 'awsAccessKey',
+          awsSecretKey: 'awsSecretKey',
+          region: 'region',
+          service: 'service',
+          type: AwsRequestType.get,
+          mockFunction: (Request request) async {
+            return Response('', 200);
+          },
+        );
       });
-      test('maximum', () {
-        try {
-          MockAwsRequest.staticSend(
-            awsAccessKey: 'awsAccessKey',
-            awsSecretKey: 'awsSecretKey',
-            region: 'region',
-            service: 'service',
-            type: AwsRequestType.get,
-            signedHeaders: ['a'],
-            headers: {'a': 'a'},
-            jsonBody: '{"test":"true"}',
-            queryPath: '/',
-            queryString: {'test': 'true'},
-            timeout: const Duration(seconds: 5),
-            mockFunction: (Request request) async {
-              return Response('', 200);
-            },
-          );
-        } catch (e) {
-          fail('Could not send request');
-        }
+      test('maximum', () async {
+        await MockAwsRequest.staticSend(
+          awsAccessKey: 'awsAccessKey',
+          awsSecretKey: 'awsSecretKey',
+          region: 'region',
+          service: 'service',
+          type: AwsRequestType.get,
+          signedHeaders: ['a'],
+          headers: {'a': 'a'},
+          jsonBody: '{"test":"true"}',
+          queryPath: '/',
+          queryString: {'test': 'true'},
+          timeout: const Duration(seconds: 5),
+          mockFunction: (Request request) async {
+            return Response('', 200);
+          },
+        );
       });
     });
     group('send', () {
@@ -96,62 +88,47 @@ void main() {
         }
         fail('Validation not correct');
       });
-      test('pass validation - values in constructor', () {
-        try {
-          MockAwsRequest(
-            awsAccessKey: 'awsAccessKey',
-            awsSecretKey: 'awsSecretKey',
-            region: 'region',
-            service: 'service',
-            mockFunction: (Request request) async {
-              return Response('', 200);
-            },
-          ).send(type: AwsRequestType.get);
-        } catch (e) {
-          print(e);
-          fail('Validation not correct');
-        }
+      test('pass validation - values in constructor', () async {
+        await MockAwsRequest(
+          awsAccessKey: 'awsAccessKey',
+          awsSecretKey: 'awsSecretKey',
+          region: 'region',
+          service: 'service',
+          mockFunction: (Request request) async {
+            return Response('', 200);
+          },
+        ).send(type: AwsRequestType.get);
       });
-      test('pass validation - values in function', () {
-        try {
-          MockAwsRequest(
-            awsAccessKey: 'awsAccessKey',
-            awsSecretKey: 'awsSecretKey',
-            region: 'region',
-            mockFunction: (Request request) async {
-              return Response('', 200);
-            },
-          ).send(
-            type: AwsRequestType.get,
-            service: 'service',
-          );
-        } catch (e) {
-          print(e);
-          fail('Validation not correct');
-        }
+      test('pass validation - values in function', () async {
+        await MockAwsRequest(
+          awsAccessKey: 'awsAccessKey',
+          awsSecretKey: 'awsSecretKey',
+          region: 'region',
+          mockFunction: (Request request) async {
+            return Response('', 200);
+          },
+        ).send(
+          type: AwsRequestType.get,
+          service: 'service',
+        );
       });
-      test('pass validation - values in both', () {
-        try {
-          MockAwsRequest(
-            awsAccessKey: 'awsAccessKey',
-            awsSecretKey: 'awsSecretKey',
-            region: 'region',
-            service: 'service_1',
-            mockFunction: (Request request) async {
-              return Response('', 200);
-            },
-          ).send(
-            type: AwsRequestType.get,
-            service: 'service',
-          );
-        } catch (e) {
-          print(e);
-          fail('Validation not correct');
-        }
+      test('pass validation - values in both', () async {
+        await MockAwsRequest(
+          awsAccessKey: 'awsAccessKey',
+          awsSecretKey: 'awsSecretKey',
+          region: 'region',
+          service: 'service_1',
+          mockFunction: (Request request) async {
+            return Response('', 200);
+          },
+        ).send(
+          type: AwsRequestType.get,
+          service: 'service',
+        );
       });
-      test('pass validation - values set later', () {
+      test('pass validation - values set later', () async {
         try {
-          MockAwsRequest(
+          final MockAwsRequest awsRequest = MockAwsRequest(
             awsAccessKey: 'awsAccessKey',
             awsSecretKey: 'awsSecretKey',
             region: 'region',
@@ -159,35 +136,31 @@ void main() {
               return Response('', 200);
             },
           )
-            ..service = 'service'
-            ..send(type: AwsRequestType.get);
+            ..service = 'service';
+          await awsRequest.send(type: AwsRequestType.get);
         } catch (e) {
           print(e);
           fail('Validation not correct');
         }
       });
-      test('maximum', () {
-        try {
-          MockAwsRequest(
-            awsAccessKey: 'awsAccessKey',
-            awsSecretKey: 'awsSecretKey',
-            region: 'region',
-            mockFunction: (Request request) async {
-              return Response('', 200);
-            },
-          ).send(
-            type: AwsRequestType.get,
-            service: 'service',
-            signedHeaders: ['a'],
-            headers: {'a': 'a'},
-            jsonBody: '{"test":"true"}',
-            queryPath: '/',
-            queryString: {'test': 'true'},
-            timeout: const Duration(seconds: 5),
-          );
-        } catch (e) {
-          fail('Could not send request');
-        }
+      test('maximum', () async {
+        await MockAwsRequest(
+          awsAccessKey: 'awsAccessKey',
+          awsSecretKey: 'awsSecretKey',
+          region: 'region',
+          mockFunction: (Request request) async {
+            return Response('', 200);
+          },
+        ).send(
+          type: AwsRequestType.get,
+          service: 'service',
+          signedHeaders: ['a'],
+          headers: {'a': 'a'},
+          jsonBody: '{"test":"true"}',
+          queryPath: '/',
+          queryString: {'test': 'true'},
+          timeout: const Duration(seconds: 5),
+        );
       });
     });
   });

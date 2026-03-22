@@ -9,7 +9,7 @@ Future<void> awsRequestFunction(String logString) async {
   );
   final Response result = await request.send(
     type: AwsRequestType.post,
-    jsonBody: "{'jsonKey': 'jsonValue'}",
+    jsonBody: '{"jsonKey": "jsonValue"}',
     service: 'logs',
     queryString: {'X-Amz-Expires': '10'},
     headers: {'X-Amz-Security-Token': 'XXXXXXXXXXXX'},

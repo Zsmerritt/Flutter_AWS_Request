@@ -10,7 +10,20 @@ import 'package:http/http.dart';
 export 'package:aws_request/src/request.dart'
     show AwsRequestType, AwsRequestException;
 
-/// A class to easily send API requests to AWS services
+/// A class to easily send API requests to AWS services.
+///
+/// [awsAccessKey], [awsSecretKey], and [region] are mutable so callers can
+/// rotate credentials or change region without constructing a new instance.
+/// Do not log or expose instances that hold secrets.
+///
+/// **Temporary credentials (STS, IAM roles, assumed roles):** Supported. Use
+/// the temporary access key ID for [awsAccessKey] and the temporary secret
+/// for [awsSecretKey] (same as long-lived keys). You must also send the
+/// session token: add `X-Amz-Security-Token` to [headers] and include
+/// `x-amz-security-token` in [signedHeaders] so it participates in the SigV4
+/// signature. Example:
+/// `headers: {'X-Amz-Security-Token': sessionToken}`,
+/// `signedHeaders: ['x-amz-security-token']`.
 class AwsRequest {
   /// The aws service you are sending a request to
   String? service;
