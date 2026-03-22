@@ -1,5 +1,4 @@
-// Regression tests for Phase-1 SigV4 audit findings. These intentionally fail
-// until the library is fixed (do not skip). Fix hints are in each comment.
+// Regression tests for Phase-1 SigV4 audit findings (now passing).
 //
 // References:
 // https://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
@@ -15,17 +14,13 @@ import 'package:test/test.dart';
 
 import 'sigv4_aws_suite_vectors.dart';
 
-// Run without these tests: dart test --exclude-tags regression
 void main() {
   group('SigV4 regression: default signed headers vs AWS suite', () {
     test(
-      'get_signed_headers_always_adds_content_type_breaking_get_vanilla_authz_match',
+      'get_signed_headers_without_content_type_matches_get_vanilla_authorization',
       () {
-        // Phase 1: getSignedHeaders injects content-type even when absent from
-        // the wire request; AWS suite get-vanilla has only host + x-amz-date.
-        // Fix: only sign Content-Type when present on the outbound request, or
-        // align defaults with service expectations.
-        // Suite: get-vanilla (.authz).
+        // SigV4: sign Content-Type only when present (Create canonical request).
+        // get-vanilla has only host + x-amz-date.
         final Map<String, String> signed = AwsHttpRequest.getSignedHeaders(
           headers: <String, String>{},
           signedHeaderNames: const <String>[],
@@ -48,15 +43,10 @@ void main() {
           service: kAwsSuiteService,
           signedHeaders: signed,
         );
-        expect(
-          auth,
-          kGetVanillaAuthz,
-          reason:
-              'Expected to fail until optional content-type signing is fixed',
-        );
+        expect(auth, kGetVanillaAuthz);
       },
     );
-  }, tags: ['regression']);
+  });
 
   group('SigV4 regression: canonical query encoding (Uri vs SigV4 UriEncode)',
       () {
@@ -68,20 +58,13 @@ void main() {
         // Fix: build canonical query with a SigV4 encoder, not raw Uri.query.
         final Map<String, String>? sorted =
             AwsHttpRequest.sortedQueryParameters(<String, String>{'k': 'a b'});
-        final Uri url = Uri(
-          scheme: 'https',
-          host: kAwsSuiteHost,
-          path: '/',
-          queryParameters: sorted,
-        );
         expect(
-          url.query,
+          AwsHttpRequest.sigV4CanonicalQueryString(sorted),
           'k=a%20b',
-          reason: 'Expected to fail: Uri encodes space as +',
         );
       },
     );
-  }, tags: ['regression']);
+  });
 
   group('SigV4 regression: canonical URI empty path', () {
     test(
@@ -90,19 +73,10 @@ void main() {
         // Phase 1: AWS requires CanonicalURI '/' when absolute path is empty.
         // send() uses Uri(path: canonicalUri); path '' yields no trailing slash.
         // Fix: normalize empty path to '/' before signing and request URL.
-        final Uri url = Uri(
-          scheme: 'https',
-          host: kAwsSuiteHost,
-          path: '',
-        );
-        expect(
-          url.path,
-          '/',
-          reason: 'Expected to fail until empty path normalization exists',
-        );
+        expect(AwsHttpRequest.canonicalUriPathForSigV4(''), '/');
       },
     );
-  }, tags: ['regression']);
+  });
 
   group('SigV4 regression: canonical header normalization', () {
     test(
@@ -123,15 +97,10 @@ void main() {
           canonicalUri: '/',
           canonicalQuerystring: '',
         );
-        expect(
-          actual,
-          kGetHeaderValueTrimCreq,
-          reason:
-              'Expected to fail until header value normalization is implemented',
-        );
+        expect(actual, kGetHeaderValueTrimCreq);
       },
     );
-  }, tags: ['regression']);
+  });
 
   group('SigV4 regression: S3 payload hash semantics', () {
     test(
@@ -149,16 +118,12 @@ void main() {
           },
           canonicalUri: '/',
           canonicalQuerystring: '',
+          hashedPayloadIsUnsigned: true,
         ).split('\n').last;
         final String unsignedPayloadHex =
             sha256.convert(utf8.encode('UNSIGNED-PAYLOAD')).toString();
-        expect(
-          payloadLine,
-          unsignedPayloadHex,
-          reason:
-              'Expected to fail: library uses empty-string hash, not S3 UNSIGNED-PAYLOAD',
-        );
+        expect(payloadLine, unsignedPayloadHex);
       },
     );
-  }, tags: ['regression']);
+  });
 }

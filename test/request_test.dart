@@ -28,7 +28,6 @@ void main() {
         'host': 'host',
         'x-amz-date': 'amzDate',
         'signed_header': 'signed_header',
-        'content-type': 'application/x-amz-json-1.1'
       };
       final Map<String, String> generatedSignedHeaders =
           AwsHttpRequest.getSignedHeaders(
@@ -86,7 +85,6 @@ void main() {
       const Map<String, String> correctSignedHeaders = {
         'host': 'host',
         'x-amz-date': 'amzDate',
-        'content-type': 'application/x-amz-json-1.1'
       };
       final Map<String, String> generatedSignedHeaders =
           AwsHttpRequest.getSignedHeaders(
@@ -103,7 +101,6 @@ void main() {
         'host': 'host',
         'x-amz-date': 'amzDate',
         'x-amz-security-token': 'token',
-        'content-type': 'application/x-amz-json-1.1'
       };
       final Map<String, String> generatedSignedHeaders =
           AwsHttpRequest.getSignedHeaders(

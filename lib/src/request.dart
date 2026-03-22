@@ -41,6 +41,48 @@ class AwsHttpRequest {
     );
   }
 
+  /// SigV4 [UriEncode] (Create canonical request): encode each UTF-8 byte except
+  /// unreserved characters; space is `%20` (never `+`).
+  /// https://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
+  static String _sigV4UriEncode(String input) {
+    const String unreserved =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+    final StringBuffer out = StringBuffer();
+    for (final int unit in utf8.encode(input)) {
+      if (unit < 128 && unreserved.contains(String.fromCharCode(unit))) {
+        out.writeCharCode(unit);
+      } else {
+        out.write('%${unit.toRadixString(16).toUpperCase().padLeft(2, '0')}');
+      }
+    }
+    return out.toString();
+  }
+
+  /// Canonical query string for SigV4 (sorted name=value pairs, `&`-joined).
+  static String sigV4CanonicalQueryString(Map<String, String>? canonicalQuery) {
+    final Map<String, String>? sorted = sortedQueryParameters(canonicalQuery);
+    if (sorted == null || sorted.isEmpty) {
+      return '';
+    }
+    final List<String> parts = <String>[];
+    sorted.forEach((String k, String v) {
+      parts.add('${_sigV4UriEncode(k)}=${_sigV4UriEncode(v)}');
+    });
+    return parts.join('&');
+  }
+
+  /// Empty absolute path must be `/` for CanonicalURI (SigV4).
+  /// https://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
+  static String canonicalUriPathForSigV4(String path) =>
+      path.isEmpty ? '/' : path;
+
+  /// Trim and collapse consecutive spaces in a header value (CanonicalHeaders).
+  /// https://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
+  static String canonicalHeaderValueForSigV4(String value) {
+    final String trimmed = value.trim();
+    return trimmed.replaceAll(RegExp(' +'), ' ');
+  }
+
   static Map<String, String> getSignedHeaders({
     required Map<String, String> headers,
     required List<String> signedHeaderNames,
@@ -66,7 +108,7 @@ class AwsHttpRequest {
             message: 'AwsRequest ERROR: Signed Header Not Found: '
                 '$requestedName could not be found in the included headers. '
                 'Provided header keys are ${headers.keys.toList()} '
-                'All headers besides [content-type, host, x-amz-date] '
+                'All headers besides [host, x-amz-date] '
                 'that are included in signedHeaders must be included in headers',
             stackTrace: StackTrace.current);
       }
@@ -77,8 +119,6 @@ class AwsHttpRequest {
             orElse: () => null);
     if (contentTypeKey != null) {
       signedHeaders['content-type'] = headers[contentTypeKey]!;
-    } else {
-      signedHeaders['content-type'] = 'application/x-amz-json-1.1';
     }
     return signedHeaders;
   }
@@ -109,17 +149,20 @@ class AwsHttpRequest {
     required Map<String, String> signedHeaders,
     required String canonicalUri,
     required String canonicalQuerystring,
+    bool hashedPayloadIsUnsigned = false,
   }) {
     final List<String> canonicalHeaders = [];
     signedHeaders.forEach((key, value) {
-      canonicalHeaders.add('$key:$value\n');
+      canonicalHeaders.add(
+          '$key:${canonicalHeaderValueForSigV4(value)}\n');
     });
     canonicalHeaders.sort();
     final String canonicalHeadersString = canonicalHeaders.join('');
     final List<String> keyList = signedHeaders.keys.toList()..sort();
     final String signedHeaderKeys = keyList.join(';');
-    final String payloadHash =
-        sha256.convert(utf8.encode(requestBody)).toString();
+    final String payloadHash = hashedPayloadIsUnsigned
+        ? sha256.convert(utf8.encode('UNSIGNED-PAYLOAD')).toString()
+        : sha256.convert(utf8.encode(requestBody)).toString();
     final String canonicalRequest =
         '$type\n$canonicalUri\n$canonicalQuerystring\n$canonicalHeadersString\n'
         '$signedHeaderKeys\n$payloadHash';
@@ -261,26 +304,31 @@ class AwsHttpRequest {
       );
     }
     final String host = endpoint ?? '$service.$region.amazonaws.com';
-    // SigV4 canonical query must match the exact query string on the wire.
-    // Build a sorted map first, then let [Uri] encode it — do not hand-roll
-    // encodeQueryComponent (encoding can differ from [Uri.query]).
     final Map<String, String>? sortedQueryParams =
         sortedQueryParameters(canonicalQuery);
-    final Uri url = Uri(
-      scheme: 'https',
-      host: host,
-      path: canonicalUri,
-      queryParameters: sortedQueryParams,
-    );
+    final String pathForRequest = canonicalUriPathForSigV4(canonicalUri);
+    final String sortedCanonicalQuery =
+        sigV4CanonicalQueryString(sortedQueryParams);
+    final Uri url = sortedCanonicalQuery.isEmpty
+        ? Uri(scheme: 'https', host: host, path: pathForRequest)
+        : Uri(
+            scheme: 'https',
+            host: host,
+            path: pathForRequest,
+            query: sortedCanonicalQuery,
+          );
     final String amzDate = _formatAmzDate(DateTime.now());
+    final Map<String, String> headersForSigning = {
+      ...defaultHeaders,
+      ...headers,
+    };
     final Map<String, String> signedHeadersMap = getSignedHeaders(
-      headers: headers,
+      headers: headersForSigning,
       signedHeaderNames: signedHeaders,
       host: host,
       amzDate: amzDate,
     );
 
-    final String sortedCanonicalQuery = url.query;
     final String canonicalRequest = getCanonicalRequest(
       type: type.name.toUpperCase(),
       requestBody: jsonBody,

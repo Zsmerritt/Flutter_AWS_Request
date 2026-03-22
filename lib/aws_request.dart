@@ -59,11 +59,11 @@ class AwsRequest {
   ///
   /// service: aws service you are sending request to
   ///
-  /// signedHeaders: a list of headers aws requires in the signature.
+  /// signedHeaders: extra header names (lowercase) to include in the signature.
   ///
-  ///    Default included signed headers are: [content-type, host, x-amz-date]
-  ///
-  ///    (You do not need to provide these in headers)
+  /// Always signed: [host], [x-amz-date]. [Content-Type] is signed when present
+  /// on the merged request headers (defaults supply `application/x-amz-json-1.1`
+  /// unless overridden).
   ///
   /// headers: any required headers. Any non-default headers included in the signedHeaders must be added here.
   ///
@@ -111,11 +111,11 @@ class AwsRequest {
   ///
   /// service: aws service you are sending request to
   ///
-  /// signedHeaders: a list of headers aws requires in the signature.
+  /// signedHeaders: extra header names (lowercase) to include in the signature.
   ///
-  ///    Default included signed headers are: [content-type, host, x-amz-date]
-  ///
-  ///    (You do not need to provide these in headers)
+  /// Always signed: [host], [x-amz-date]. [Content-Type] is signed when present
+  /// on the merged request headers (defaults supply `application/x-amz-json-1.1`
+  /// unless overridden).
   ///
   /// headers: any required headers. Any non-default headers included in the signedHeaders must be added here.
   ///

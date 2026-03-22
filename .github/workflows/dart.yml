@@ -22,11 +22,10 @@ jobs:
         run: dart analyze
 
       - name: Run tests
-        # Regression tag: intentional reds until SigV4 fixes (see test/sigv4_regression_test.dart).
-        run: flutter test --exclude-tags regression
+        run: flutter test
 
       - name: Collect coverage
-        run: flutter test --coverage --exclude-tags regression .
+        run: flutter test --coverage .
       - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
