@@ -314,18 +314,15 @@ void main() {
       'get_vanilla_query_unreserved_uri_query_matches_suite_canonical_query_string',
       () {
         // Scenario: get-vanilla-query-unreserved — unreserved chars in query;
-        // canonical query must match the suite .creq line (sorted, encoded).
+        // canonical query must match the suite .creq line (sorted, SigV4-encoded).
         final Map<String, String>? sorted =
             AwsHttpRequest.sortedQueryParameters(
           <String, String>{kUnreservedParamName: kUnreservedParamName},
         );
-        final Uri url = Uri(
-          scheme: 'https',
-          host: kAwsSuiteHost,
-          path: '/',
-          queryParameters: sorted,
+        expect(
+          AwsHttpRequest.sigV4CanonicalQueryString(sorted),
+          kGetVanillaQueryUnreservedCanonicalQuery,
         );
-        expect(url.query, kGetVanillaQueryUnreservedCanonicalQuery);
       },
     );
 

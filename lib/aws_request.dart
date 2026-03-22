@@ -73,6 +73,16 @@ class AwsRequest {
   ///
   /// queryString: the url query string as a Map
   ///
+  /// queryStringPairs: when set, used instead of [queryString] so duplicate
+  /// query parameter names are allowed (SigV4 canonical query).
+  ///
+  /// hashedPayloadIsUnsigned: for Amazon S3, set [hashedPayloadIsUnsigned] to
+  /// true to use `UNSIGNED-PAYLOAD` in the canonical request and send
+  /// `x-amz-content-sha256: UNSIGNED-PAYLOAD` (see AWS SigV4 canonical request).
+  ///
+  /// useNonS3DoubleEncodedCanonicalPath: double-encode each path segment for
+  /// non-S3 SigV4 (ignored for typical S3 virtual-hosted paths).
+  ///
   /// endpoint: custom hostname override (e.g., 'mybucket.s3.us-east-1.amazonaws.com').
   /// Defaults to '{service}.{region}.amazonaws.com' when null.
   static Future<Response> staticSend({
@@ -86,6 +96,9 @@ class AwsRequest {
     String jsonBody = '',
     String queryPath = '/',
     Map<String, String>? queryString,
+    List<MapEntry<String, String>>? queryStringPairs,
+    bool hashedPayloadIsUnsigned = false,
+    bool useNonS3DoubleEncodedCanonicalPath = false,
     Duration timeout = const Duration(seconds: 10),
     String? endpoint,
   }) async {
@@ -100,6 +113,9 @@ class AwsRequest {
       jsonBody: jsonBody,
       canonicalUri: queryPath,
       canonicalQuery: queryString,
+      canonicalQueryPairs: queryStringPairs,
+      hashedPayloadIsUnsigned: hashedPayloadIsUnsigned,
+      useNonS3DoubleEncodedCanonicalPath: useNonS3DoubleEncodedCanonicalPath,
       timeout: timeout,
       endpoint: endpoint,
     );
@@ -137,6 +153,9 @@ class AwsRequest {
     String jsonBody = '',
     String queryPath = '/',
     Map<String, String>? queryString,
+    List<MapEntry<String, String>>? queryStringPairs,
+    bool hashedPayloadIsUnsigned = false,
+    bool useNonS3DoubleEncodedCanonicalPath = false,
     Duration? timeout,
     String? endpoint,
   }) async {
@@ -152,6 +171,9 @@ class AwsRequest {
       jsonBody: jsonBody,
       canonicalUri: queryPath,
       canonicalQuery: queryString,
+      canonicalQueryPairs: queryStringPairs,
+      hashedPayloadIsUnsigned: hashedPayloadIsUnsigned,
+      useNonS3DoubleEncodedCanonicalPath: useNonS3DoubleEncodedCanonicalPath,
       timeout: timeout ?? this.timeout,
       endpoint: endpoint ?? this.endpoint,
     );

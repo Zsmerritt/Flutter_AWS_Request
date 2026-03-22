@@ -71,6 +71,49 @@ class AwsHttpRequest {
     return parts.join('&');
   }
 
+  /// Same as [sigV4CanonicalQueryString] but allows duplicate parameter names
+  /// (e.g. `?Param1=a&Param1=b`). [Map] cannot represent that use case.
+  /// https://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
+  static String sigV4CanonicalQueryPairs(List<MapEntry<String, String>> pairs) {
+    if (pairs.isEmpty) {
+      return '';
+    }
+    final List<MapEntry<String, String>> sorted =
+        List<MapEntry<String, String>>.from(pairs)
+          ..sort((MapEntry<String, String> a, MapEntry<String, String> b) {
+            final int c = a.key.compareTo(b.key);
+            if (c != 0) {
+              return c;
+            }
+            return a.value.compareTo(b.value);
+          });
+    return sorted
+        .map(
+          (MapEntry<String, String> e) =>
+              '${_sigV4UriEncode(e.key)}=${_sigV4UriEncode(e.value)}',
+        )
+        .join('&');
+  }
+
+  /// Non-S3 SigV4: each path segment is URI-encoded twice (S3 uses a single pass).
+  /// [path] should start with `/` (except empty → `/`).
+  /// https://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
+  static String canonicalUriPathNonS3DoubleEncode(String path) {
+    final String normalized = canonicalUriPathForSigV4(path);
+    if (normalized == '/') {
+      return '/';
+    }
+    final List<String> segments = normalized.split('/');
+    final List<String> encoded = <String>[];
+    for (final String seg in segments) {
+      if (seg.isEmpty) {
+        continue;
+      }
+      encoded.add(_sigV4UriEncode(_sigV4UriEncode(seg)));
+    }
+    return '/${encoded.join('/')}';
+  }
+
   /// Empty absolute path must be `/` for CanonicalURI (SigV4).
   /// https://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
   static String canonicalUriPathForSigV4(String path) =>
@@ -180,14 +223,21 @@ class AwsHttpRequest {
   }) {
     const String algorithm = 'AWS4-HMAC-SHA256';
     final String dateStamp = amzDate.substring(0, 8);
-    final String credentialScope = '$dateStamp/$region/$service/aws4_request';
+    // Region and service must be lowercase in credential scope and in signing
+    // key derivation (HMAC chain).
+    // https://docs.aws.amazon.com/general/latest/gr/sigv4-create-string-to-sign.html
+    // https://docs.aws.amazon.com/general/latest/gr/sigv4-calculate-signature.html
+    final String regionLc = region.toLowerCase();
+    final String serviceLc = service.toLowerCase();
+    final String credentialScope =
+        '$dateStamp/$regionLc/$serviceLc/aws4_request';
     final String stringToSign = '$algorithm\n$amzDate\n$credentialScope\n'
         '${sha256.convert(utf8.encode(canonicalRequest)).toString()}';
     final String signature = getSignature(
       key: awsSecretKey,
       dateStamp: dateStamp,
-      regionName: region,
-      serviceName: service,
+      regionName: regionLc,
+      serviceName: serviceLc,
       stringToSign: stringToSign,
     );
     final List<String> keyList = signedHeaders.keys.toList()..sort();
@@ -292,6 +342,9 @@ class AwsHttpRequest {
     required String jsonBody,
     required String canonicalUri,
     Map<String, String>? canonicalQuery,
+    List<MapEntry<String, String>>? canonicalQueryPairs,
+    bool hashedPayloadIsUnsigned = false,
+    bool useNonS3DoubleEncodedCanonicalPath = false,
     String? endpoint,
     bool mockRequest = false,
     Future<Response> Function(Request)? mockFunction,
@@ -306,9 +359,12 @@ class AwsHttpRequest {
     final String host = endpoint ?? '$service.$region.amazonaws.com';
     final Map<String, String>? sortedQueryParams =
         sortedQueryParameters(canonicalQuery);
-    final String pathForRequest = canonicalUriPathForSigV4(canonicalUri);
-    final String sortedCanonicalQuery =
-        sigV4CanonicalQueryString(sortedQueryParams);
+    final String pathForRequest = useNonS3DoubleEncodedCanonicalPath
+        ? canonicalUriPathNonS3DoubleEncode(canonicalUri)
+        : canonicalUriPathForSigV4(canonicalUri);
+    final String sortedCanonicalQuery = canonicalQueryPairs != null
+        ? sigV4CanonicalQueryPairs(canonicalQueryPairs)
+        : sigV4CanonicalQueryString(sortedQueryParams);
     final Uri url = sortedCanonicalQuery.isEmpty
         ? Uri(scheme: 'https', host: host, path: pathForRequest)
         : Uri(
@@ -318,13 +374,27 @@ class AwsHttpRequest {
             query: sortedCanonicalQuery,
           );
     final String amzDate = _formatAmzDate(DateTime.now());
-    final Map<String, String> headersForSigning = {
+    Map<String, String> headersForSigning = {
       ...defaultHeaders,
       ...headers,
     };
+    if (hashedPayloadIsUnsigned) {
+      headersForSigning = {
+        ...headersForSigning,
+        'x-amz-content-sha256': 'UNSIGNED-PAYLOAD',
+      };
+    }
+    final bool hasAmzContentSha256 = signedHeaders.any(
+      (String s) => s.toLowerCase() == 'x-amz-content-sha256',
+    );
+    final List<String> signedHeaderNames = <String>[
+      ...signedHeaders,
+      if (hashedPayloadIsUnsigned && !hasAmzContentSha256)
+        'x-amz-content-sha256',
+    ];
     final Map<String, String> signedHeadersMap = getSignedHeaders(
       headers: headersForSigning,
-      signedHeaderNames: signedHeaders,
+      signedHeaderNames: signedHeaderNames,
       host: host,
       amzDate: amzDate,
     );
@@ -335,6 +405,7 @@ class AwsHttpRequest {
       signedHeaders: signedHeadersMap,
       canonicalUri: url.path,
       canonicalQuerystring: sortedCanonicalQuery,
+      hashedPayloadIsUnsigned: hashedPayloadIsUnsigned,
     );
     final String auth = getAuth(
       awsSecretKey: awsSecretKey,
@@ -345,8 +416,12 @@ class AwsHttpRequest {
       service: service,
       signedHeaders: signedHeadersMap,
     );
+    final Map<String, String> headersForWire = {
+      ...headers,
+      if (hashedPayloadIsUnsigned) 'x-amz-content-sha256': 'UNSIGNED-PAYLOAD',
+    };
     final Map<String, String> updatedHeaders = getHeaders(
-      headers: headers,
+      headers: headersForWire,
       amzDate: amzDate,
       auth: auth,
     );

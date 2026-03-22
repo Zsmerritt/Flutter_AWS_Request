@@ -15,6 +15,42 @@ import 'package:test/test.dart';
 import 'sigv4_aws_suite_vectors.dart';
 
 void main() {
+  group('SigV4 regression: credential scope casing', () {
+    test(
+      'get_auth_lowercases_region_and_service_in_credential_scope_per_string_to_sign',
+      () {
+        // docs.aws.amazon.com/general/latest/gr/sigv4-create-string-to-sign.html
+        // — CredentialScope region and service must be lowercase.
+        final String upper = AwsHttpRequest.getAuth(
+          awsSecretKey: kAwsSuiteSecretAccessKey,
+          awsAccessKey: kAwsSuiteAccessKeyId,
+          amzDate: kAwsSuiteAmzDate,
+          canonicalRequest: kGetVanillaCreq,
+          region: 'US-EAST-1',
+          service: 'SERVICE',
+          signedHeaders: const <String, String>{
+            'host': kAwsSuiteHost,
+            'x-amz-date': kAwsSuiteAmzDate,
+          },
+        );
+        final String lower = AwsHttpRequest.getAuth(
+          awsSecretKey: kAwsSuiteSecretAccessKey,
+          awsAccessKey: kAwsSuiteAccessKeyId,
+          amzDate: kAwsSuiteAmzDate,
+          canonicalRequest: kGetVanillaCreq,
+          region: kAwsSuiteRegion,
+          service: kAwsSuiteService,
+          signedHeaders: const <String, String>{
+            'host': kAwsSuiteHost,
+            'x-amz-date': kAwsSuiteAmzDate,
+          },
+        );
+        expect(upper, lower);
+        expect(upper, contains('20150830/us-east-1/service/aws4_request'));
+      },
+    );
+  });
+
   group('SigV4 regression: default signed headers vs AWS suite', () {
     test(
       'get_signed_headers_without_content_type_matches_get_vanilla_authorization',
