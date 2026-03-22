@@ -22,6 +22,21 @@ void main() {
     });
   });
 
+  group('sigV4CanonicalQueryPairs', () {
+    test(
+      'duplicate_names_use_value_compare_when_keys_equal',
+      () {
+        expect(
+          AwsHttpRequest.sigV4CanonicalQueryPairs(<MapEntry<String, String>>[
+            const MapEntry('k', 'z'),
+            const MapEntry('k', 'a'),
+          ]),
+          'k=a&k=z',
+        );
+      },
+    );
+  });
+
   group('getSignedHeaders', () {
     test('getSignedHeaders', () {
       const Map<String, String> correctSignedHeaders = {

@@ -20,6 +20,18 @@ class AwsHttpRequest {
         'Z';
   }
 
+  /// SigV4 canonical query ordering: sort by parameter name, then value.
+  static int _compareSigV4QueryEntries(
+    MapEntry<String, String> a,
+    MapEntry<String, String> b,
+  ) {
+    final int c = a.key.compareTo(b.key);
+    if (c != 0) {
+      return c;
+    }
+    return a.value.compareTo(b.value);
+  }
+
   /// Returns a copy of [canonicalQuery] with entries sorted by key, then by
   /// value, per SigV4 canonical query rules. Returns null when
   /// [canonicalQuery] is null.
@@ -30,14 +42,7 @@ class AwsHttpRequest {
       return null;
     }
     return Map<String, String>.fromEntries(
-      canonicalQuery.entries.toList()
-        ..sort((MapEntry<String, String> a, MapEntry<String, String> b) {
-          final int c = a.key.compareTo(b.key);
-          if (c != 0) {
-            return c;
-          }
-          return a.value.compareTo(b.value);
-        }),
+      canonicalQuery.entries.toList()..sort(_compareSigV4QueryEntries),
     );
   }
 
@@ -80,13 +85,7 @@ class AwsHttpRequest {
     }
     final List<MapEntry<String, String>> sorted =
         List<MapEntry<String, String>>.from(pairs)
-          ..sort((MapEntry<String, String> a, MapEntry<String, String> b) {
-            final int c = a.key.compareTo(b.key);
-            if (c != 0) {
-              return c;
-            }
-            return a.value.compareTo(b.value);
-          });
+          ..sort(_compareSigV4QueryEntries);
     return sorted
         .map(
           (MapEntry<String, String> e) =>
