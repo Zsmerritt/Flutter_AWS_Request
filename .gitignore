@@ -79,3 +79,4 @@ build/
 *.json
 test/coverage_helper_test.dart
 coverage/lcov.info
+coverage/
