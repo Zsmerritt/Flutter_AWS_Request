@@ -1,12 +1,19 @@
-## [2.0.1] - 2026/03/22
+## [2.1.0] - 2026/03/22
 
 ### Changes:
 
-* Canonical query string for SigV4 now uses the same encoding as the wire request: query parameters are sorted (key, then value), then passed through `Uri` so `url.query` is signed — avoids mismatches from hand-rolled `encodeQueryComponent`
-* `signedHeaders` names are resolved case-insensitively against `headers` (HTTP header names are case-insensitive)
-* `AwsRequestException.toString()` now includes `stackTrace`
+* **SigV4 correctness:** Canonical query string matches the wire request — parameters sorted by name then value, encoding aligned with how the request `Uri` is built (avoids signing/query mismatches from ad hoc encoding)
+* **SigV4 correctness:** Region and service names are lowercased in credential scope *and* in signing-key derivation (fixes invalid signatures when callers pass mixed-case region or service)
+* **New request options** on `AwsRequest.send` / `staticSend` and `MockAwsRequest`: `queryStringPairs` for duplicate query parameter names (not expressible with `Map`); `hashedPayloadIsUnsigned` for S3-style `UNSIGNED-PAYLOAD`; `useNonS3DoubleEncodedCanonicalPath` for non-S3 path double-encoding rules
+* `signedHeaders` entries are resolved case-insensitively against merged request headers
+* Signing uses the same normalized canonical path as the outbound `Uri` (`url.path`)
+* `AwsRequestException.toString()` includes `stackTrace`
 * `AwsHttpRequest.send` rejects empty `awsAccessKey` / `awsSecretKey`
-* README: note on retries and HTTP client lifecycle
+* Clearer error when `mockRequest` is true but `mockFunction` is null
+* README: STS / temporary credentials (`X-Amz-Security-Token` and signing it); retries and HTTP client lifecycle; duplicate query keys with `Map`; corrected JSON body examples
+* API docs updated for mutable credential fields, default signed headers, and the new options
+* Stricter `analysis_options.yaml` (extends `package:lints/recommended.yaml`)
+* Test suite expanded (SigV4 vector/conformance coverage; optional live AWS tests behind environment configuration)
 
 ## [2.0.0] - 2026/03/21
 
